@@ -4,11 +4,11 @@ com\sga\controllers\TalleresController.class
 com\sga\service\RESTClient$1.class
 com\sga\service\RESTClient$3.class
 com\sga\model\Colegio.class
-com\sga\controllers\ColegiosController$ActionWithException.class
 module-info.class
 com\sga\App.class
 com\sga\controllers\ReportesController$ActionWithException.class
 com\sga\controllers\LoginController.class
+com\sga\controllers\ColegiosController$RunnableWithException.class
 com\sga\controllers\AgendaController.class
 com\sga\model\Taller.class
 com\sga\service\RESTClient.class

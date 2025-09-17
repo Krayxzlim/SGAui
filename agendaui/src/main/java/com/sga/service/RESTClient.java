@@ -297,4 +297,5 @@ public class RESTClient {
             throw new RuntimeException("Error al exportar Excel: " + resp.statusCode());
         }
     }
+    
 }

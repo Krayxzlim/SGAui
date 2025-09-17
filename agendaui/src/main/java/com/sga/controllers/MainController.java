@@ -1,5 +1,7 @@
 package com.sga.controllers;
 
+import java.net.URL;
+
 import com.sga.service.RESTClient;
 
 import javafx.fxml.FXML;
@@ -58,22 +60,23 @@ public class MainController {
     @FXML
     public void initialize() {
         try {
-            loadTab("Colegios", "/com/sga/Colegios.fxml");
-            loadTab("Talleres", "/com/sga/Talleres.fxml");
-            loadTab("Usuarios", "/com/sga/Usuarios.fxml");
-            loadTab("Agenda", "/com/sga/Agenda.fxml");
-            loadTab("Reportes", "/com/sga/Reportes.fxml");
+            loadTab("Colegios", "com/sga/Colegios.fxml");
+            loadTab("Talleres", "com/sga/Talleres.fxml");
+            loadTab("Usuarios", "com/sga/Usuarios.fxml");
+            loadTab("Agenda", "com/sga/Agenda.fxml");
+            loadTab("Reportes", "com/sga/Reportes.fxml");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void loadTab(String tabName, String fxmlPath) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+        URL url = getClass().getResource("/" + fxmlPath); // agrega "/" al inicio
+        System.out.println("Cargando FXML desde: " + url);
+        FXMLLoader loader = new FXMLLoader(url);
         Node node = loader.load();
-        Object controller = loader.getController();
 
-        // Asignar cliente si tiene método setClient
+        Object controller = loader.getController();
         if (controller instanceof ColegiosController cc) cc.setClient(client);
         else if (controller instanceof TalleresController tc) tc.setClient(client);
         else if (controller instanceof UsuariosController uc) uc.setClient(client);
@@ -82,4 +85,5 @@ public class MainController {
 
         getTabByText(tabName).setContent(node);
     }
+
 }
