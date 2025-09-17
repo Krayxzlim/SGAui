@@ -14,7 +14,7 @@ public class MainController {
 
     @FXML private TabPane tabPane;
 
-    private static RESTClient client;
+    private static RESTClient client = new RESTClient();
     private String userRole; // admin, supervisor, tallerista
 
     // Controllers de los módulos

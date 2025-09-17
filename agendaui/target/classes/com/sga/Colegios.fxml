@@ -12,7 +12,7 @@
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
-        <TableView fx:id="tableColegios" prefHeight="300">
+    <TableView fx:id="tableColegios" prefHeight="300">
         <columns>
             <TableColumn fx:id="colId" text="ID"/>
             <TableColumn fx:id="colNombre" text="Nombre"/>

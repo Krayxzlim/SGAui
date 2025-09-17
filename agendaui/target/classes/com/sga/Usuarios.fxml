@@ -11,14 +11,17 @@
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
+    <!-- Tabla de usuarios -->
     <TableView fx:id="tableUsuarios" prefHeight="300">
         <columns>
             <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
             <TableColumn fx:id="colNombre" text="Nombre" prefWidth="150"/>
             <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
+            <TableColumn fx:id="colRol" text="Rol"/>
         </columns>
     </TableView>
 
+    <!-- Campos para crear/editar usuario -->
     <HBox spacing="10">
         <Label text="Nombre:"/>
         <TextField fx:id="tfNombre" prefWidth="150"/>
@@ -26,8 +29,11 @@
         <TextField fx:id="tfEmail" prefWidth="200"/>
         <Label text="Password:"/>
         <TextField fx:id="tfPassword" prefWidth="150"/>
+        <Label text="Rol:"/>
+        <ComboBox fx:id="cbRol" prefWidth="150"/>
     </HBox>
 
+    <!-- Botones de acción -->
     <HBox spacing="10">
         <Button fx:id="btnCrear" text="Crear"/>
         <Button fx:id="btnActualizar" text="Actualizar"/>
