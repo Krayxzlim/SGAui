@@ -26,7 +26,7 @@ public class LoginController {
             MainController.setClient(client);
 
             // Cambiar escena
-            App.setRoot("/fxml/main"); 
+            App.setRoot("Main"); 
         } catch (Exception e) {
             errorLabel.setText("Error: " + e.getMessage());
         }

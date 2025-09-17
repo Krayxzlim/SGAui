@@ -17,7 +17,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/sga/Login.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         stage.setTitle("Agenda - Login");
@@ -33,7 +33,7 @@ public class App extends Application {
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/com/sga/" + fxml + ".fxml"));
         return fxmlLoader.load();
     }
 
