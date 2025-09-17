@@ -8,33 +8,15 @@
             fx:controller="com.sga.controllers.MainController"
             prefWidth="800" prefHeight="600">
 
-    <TabPane prefWidth="800" prefHeight="600" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-             AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+<TabPane fx:id="tabPane" prefWidth="800" prefHeight="600" AnchorPane.topAnchor="0"
+         AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
 
-        <!-- Colegios -->
-        <Tab text="Colegios">
-            <fx:include source="Colegios.fxml"/>
-        </Tab>
+    <Tab text="Colegios"/>
+    <Tab text="Talleres"/>
+    <Tab text="Usuarios"/>
+    <Tab text="Agenda"/>
+    <Tab text="Reportes"/>
 
-        <!-- Talleres -->
-        <Tab text="Talleres">
-            <fx:include source="Talleres.fxml"/>
-        </Tab>
+</TabPane>
 
-        <!-- Usuarios -->
-        <Tab text="Usuarios">
-            <fx:include source="Usuarios.fxml"/>
-        </Tab>
-
-        <!-- Agenda -->
-        <Tab text="Agenda">
-            <fx:include source="Agenda.fxml"/>
-        </Tab>
-
-        <!-- Reportes -->
-        <Tab text="Reportes">
-            <fx:include source="Reportes.fxml"/>
-        </Tab>
-
-    </TabPane>
 </AnchorPane>

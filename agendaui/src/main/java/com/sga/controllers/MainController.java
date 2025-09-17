@@ -1,11 +1,12 @@
 package com.sga.controllers;
 
 import com.sga.service.RESTClient;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.Node;
 
 public class MainController {
 
@@ -43,59 +44,42 @@ public class MainController {
                 break;
         }
     }
+    
+    private Tab getTabByText(String text) {
+        for (Tab tab : tabPane.getTabs()) {
+            if (tab.getText().equals(text)) {
+                return tab;
+            }
+        }
+        return null; // o lanzar excepción si no se encuentra
+    }
+
 
     @FXML
     public void initialize() {
         try {
-            // Colegios
-            FXMLLoader fxmlColegios = new FXMLLoader(getClass().getResource("Colegios.fxml"));
-            Node nodeColegios = fxmlColegios.load();
-            colegiosController = fxmlColegios.getController();
-            colegiosController.setClient(client);
-            colegiosController.loadData();
-            getTabByText("Colegios").setContent(nodeColegios);
-
-            // Talleres
-            FXMLLoader fxmlTalleres = new FXMLLoader(getClass().getResource("Talleres.fxml"));
-            Node nodeTalleres = fxmlTalleres.load();
-            talleresController = fxmlTalleres.getController();
-            talleresController.setClient(client);
-            talleresController.loadData();
-            getTabByText("Talleres").setContent(nodeTalleres);
-
-            // Usuarios
-            FXMLLoader fxmlUsuarios = new FXMLLoader(getClass().getResource("Usuarios.fxml"));
-            Node nodeUsuarios = fxmlUsuarios.load();
-            usuariosController = fxmlUsuarios.getController();
-            usuariosController.setClient(client);
-            usuariosController.loadData();
-            getTabByText("Usuarios").setContent(nodeUsuarios);
-
-            // Agenda
-            FXMLLoader fxmlAgenda = new FXMLLoader(getClass().getResource("Agenda.fxml"));
-            Node nodeAgenda = fxmlAgenda.load();
-            agendaController = fxmlAgenda.getController();
-            agendaController.setClient(client);
-            agendaController.loadData();
-            getTabByText("Agenda").setContent(nodeAgenda);
-
-            // Reportes
-            FXMLLoader fxmlReportes = new FXMLLoader(getClass().getResource("Reportes.fxml"));
-            Node nodeReportes = fxmlReportes.load();
-            reportesController = fxmlReportes.getController();
-            reportesController.setClient(client);
-            reportesController.loadData();
-            getTabByText("Reportes").setContent(nodeReportes);
-
+            loadTab("Colegios", "/com/sga/Colegios.fxml");
+            loadTab("Talleres", "/com/sga/Talleres.fxml");
+            loadTab("Usuarios", "/com/sga/Usuarios.fxml");
+            loadTab("Agenda", "/com/sga/Agenda.fxml");
+            loadTab("Reportes", "/com/sga/Reportes.fxml");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private Tab getTabByText(String text) {
-        return tabPane.getTabs().stream()
-                .filter(tab -> tab.getText().equals(text))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Tab " + text + " no encontrado"));
+    private void loadTab(String tabName, String fxmlPath) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+        Node node = loader.load();
+        Object controller = loader.getController();
+
+        // Asignar cliente si tiene método setClient
+        if (controller instanceof ColegiosController cc) cc.setClient(client);
+        else if (controller instanceof TalleresController tc) tc.setClient(client);
+        else if (controller instanceof UsuariosController uc) uc.setClient(client);
+        else if (controller instanceof AgendaController ac) ac.setClient(client);
+        else if (controller instanceof ReportesController rc) rc.setClient(client);
+
+        getTabByText(tabName).setContent(node);
     }
 }
