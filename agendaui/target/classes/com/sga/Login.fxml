@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.sga.LoginController"
+      alignment="CENTER" spacing="10" style="-fx-padding: 20;">
+    
+    <Label text="Iniciar Sesión" style="-fx-font-size: 18px;"/>
+
+    <TextField fx:id="emailField" promptText="Email"/>
+    <PasswordField fx:id="passwordField" promptText="Contraseña"/>
+
+    <Button text="Ingresar" onAction="#handleLogin"/>
+    <Label fx:id="errorLabel" textFill="red"/>
+</VBox>
