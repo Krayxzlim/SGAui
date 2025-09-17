@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.sga.controllers.ReportesController"
+      spacing="10" padding="10">
+
+    <TableView fx:id="tableReportes" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="200"/>
+            <TableColumn fx:id="colValor" text="Valor" prefWidth="300"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button fx:id="btnRefrescar" text="Refrescar"/>
+        <Button fx:id="btnExportar" text="Exportar Excel"/>
+    </HBox>
+
+</VBox>

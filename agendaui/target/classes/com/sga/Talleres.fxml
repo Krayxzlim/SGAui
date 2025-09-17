@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.sga.controllers.TalleresController" spacing="10" padding="10">
+
+    <TableView fx:id="tableTalleres" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="200"/>
+            <TableColumn fx:id="colDescripcion" text="Descripción" prefWidth="250"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Label text="Nombre:"/>
+        <TextField fx:id="tfNombre" prefWidth="200"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Label text="Descripción:"/>
+        <TextField fx:id="tfDescripcion" prefWidth="300"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Button fx:id="btnCrear" text="Crear"/>
+        <Button fx:id="btnActualizar" text="Actualizar"/>
+        <Button fx:id="btnEliminar" text="Eliminar"/>
+        <Button fx:id="btnRefrescar" text="Refrescar"/>
+    </HBox>
+
+</VBox>

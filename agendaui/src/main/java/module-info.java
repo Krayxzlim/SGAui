@@ -5,6 +5,7 @@ module com.sga {
     // Exporta tus paquetes para que JavaFX pueda usarlos
     requires javafx.controls;
     requires javafx.fxml;
+    opens com.sga.controllers to javafx.fxml;
 
     opens com.sga to javafx.fxml;
     opens com.sga.service to com.fasterxml.jackson.databind;

@@ -1,26 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-
-<BorderPane xmlns="http://javafx.com/javafx"
+<AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.sga.MainController">
+            fx:controller="com.sga.controllers.MainController"
+            prefWidth="800" prefHeight="600">
 
-    <top>
-        <ToolBar>
-            <Button text="Refrescar" onAction="#reload"/>
-            <Button text="Nuevo Colegio" onAction="#crearColegio"/>
-        </ToolBar>
-    </top>
+    <TabPane prefWidth="800" prefHeight="600" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+             AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
 
-    <center>
-        <TableView fx:id="table">
-            <columns>
-                <TableColumn text="ID" fx:id="colId"/>
-                <TableColumn text="Nombre" fx:id="colNombre"/>
-                <TableColumn text="Dirección" fx:id="colDireccion"/>
-            </columns>
-        </TableView>
-    </center>
-</BorderPane>
+        <!-- Colegios -->
+        <Tab text="Colegios">
+            <fx:include source="Colegios.fxml"/>
+        </Tab>
+
+        <!-- Talleres -->
+        <Tab text="Talleres">
+            <fx:include source="Talleres.fxml"/>
+        </Tab>
+
+        <!-- Usuarios -->
+        <Tab text="Usuarios">
+            <fx:include source="Usuarios.fxml"/>
+        </Tab>
+
+        <!-- Agenda -->
+        <Tab text="Agenda">
+            <fx:include source="Agenda.fxml"/>
+        </Tab>
+
+        <!-- Reportes -->
+        <Tab text="Reportes">
+            <fx:include source="Reportes.fxml"/>
+        </Tab>
+
+    </TabPane>
+</AnchorPane>

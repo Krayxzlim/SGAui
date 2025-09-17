@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.sga.controllers.AgendaController"
+      spacing="10" padding="10">
+
+    <TableView fx:id="tableAgenda" prefHeight="300">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colFecha" text="Fecha" prefWidth="100"/>
+            <TableColumn fx:id="colHora" text="Hora" prefWidth="80"/>
+            <TableColumn fx:id="colTaller" text="Taller" prefWidth="200"/>
+            <TableColumn fx:id="colResponsable" text="Responsable" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Label text="Fecha:"/>
+        <TextField fx:id="tfFecha" prefWidth="100"/>
+        <Label text="Hora:"/>
+        <TextField fx:id="tfHora" prefWidth="80"/>
+        <Label text="Taller:"/>
+        <TextField fx:id="tfTaller" prefWidth="150"/>
+        <Label text="Responsable:"/>
+        <TextField fx:id="tfResponsable" prefWidth="150"/>
+    </HBox>
+
+    <HBox spacing="10">
+        <Button fx:id="btnCrear" text="Crear"/>
+        <Button fx:id="btnActualizar" text="Actualizar"/>
+        <Button fx:id="btnEliminar" text="Eliminar"/>
+        <Button fx:id="btnRefrescar" text="Refrescar"/>
+    </HBox>
+
+</VBox>
