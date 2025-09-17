@@ -58,8 +58,9 @@ public class UsuariosController {
             if (newSel != null) {
                 tfNombre.setText(newSel.getNombre());
                 tfEmail.setText(newSel.getEmail());
-                tfPassword.setText(""); // dejamos vacía la contraseña
-                cbRol.setValue(newSel.getRol());
+                tfPassword.setText("");
+                // Mostrar solo el rol sin "ROLE_"
+                cbRol.setValue(newSel.getRol().replace("ROLE_", ""));
             }
         });
 
@@ -88,7 +89,7 @@ public class UsuariosController {
                             Long.valueOf(String.valueOf(map.get("id"))),
                             (String) map.get("nombre"),
                             (String) map.get("email"),
-                            (String) map.get("rol")
+                            ((String) map.get("rol")).replace("ROLE_", "")
                     )
             ));
         } catch (Exception e) { 
@@ -98,11 +99,13 @@ public class UsuariosController {
     }
 
     private void createUsuario() throws Exception {
+        String rol = "ROLE_" + cbRol.getValue(); // agregamos el prefijo ROLE_
+
         client.crearUsuario(Map.of(
                 "nombre", tfNombre.getText(),
                 "email", tfEmail.getText(),
                 "password", tfPassword.getText(),
-                "rol", cbRol.getValue()
+                "rol", rol
         ));
     }
 
@@ -113,7 +116,7 @@ public class UsuariosController {
         Map<String,String> body = new HashMap<>();
         body.put("nombre", tfNombre.getText());
         body.put("email", tfEmail.getText());
-        body.put("rol", cbRol.getValue());
+        body.put("rol", "ROLE_" + cbRol.getValue()); // agregamos el prefijo ROLE_
         if (!tfPassword.getText().isEmpty()) {
             body.put("password", tfPassword.getText());
         }
