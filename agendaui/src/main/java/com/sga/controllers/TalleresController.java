@@ -1,14 +1,18 @@
 package com.sga.controllers;
 
+import java.util.Map;
+
 import com.sga.model.Taller;
 import com.sga.service.RESTClient;
+
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-
-import java.util.Map;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 
 public class TalleresController {
 
@@ -54,15 +58,12 @@ public class TalleresController {
     public void loadData() {
         try {
             data.clear();
-            client.listTalleres().forEach(map -> data.add(
-                    new Taller(
-                            Long.valueOf(String.valueOf(map.get("id"))),
-                            (String) map.get("nombre"),
-                            (String) map.get("descripcion")
-                    )
-            ));
-        } catch (Exception e) { e.printStackTrace(); }
+            data.addAll(client.listTalleres()); // ya devuelve List<Taller>
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     private void createTaller() throws Exception {
         client.crearTaller(Map.of(

@@ -12,4 +12,6 @@ module com.sga {
 
     exports com.sga;
     exports com.sga.service;
+    exports com.sga.controllers;
+    exports com.sga.model;
 }

@@ -84,19 +84,13 @@ public class UsuariosController {
     public void loadData() {
         try {
             data.clear();
-            client.listUsuarios().forEach(map -> data.add(
-                    new Usuario(
-                            Long.valueOf(String.valueOf(map.get("id"))),
-                            (String) map.get("nombre"),
-                            (String) map.get("email"),
-                            ((String) map.get("rol")).replace("ROLE_", "")
-                    )
-            ));
+            data.addAll(client.listUsuarios()); // ya devuelve List<Usuario>
         } catch (Exception e) { 
             e.printStackTrace();
             showAlert("Error", e.getMessage());
         }
     }
+
 
     private void createUsuario() throws Exception {
         String rol = "ROLE_" + cbRol.getValue(); // agregamos el prefijo ROLE_

@@ -1,131 +1,191 @@
 package com.sga.controllers;
 
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 import com.sga.model.Agenda;
+import com.sga.model.Taller;
+import com.sga.model.Usuario;
 import com.sga.service.RESTClient;
+
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.StringConverter;
 
 public class AgendaController {
 
     @FXML private TableView<Agenda> tableAgenda;
-    @FXML private TableColumn<Agenda,String> colId;
-    @FXML private TableColumn<Agenda,String> colFecha;
-    @FXML private TableColumn<Agenda,String> colHora;
-    @FXML private TableColumn<Agenda,String> colTaller;
-    @FXML private TableColumn<Agenda,String> colResponsable;
+    @FXML private TableColumn<Agenda, Long> colId;
+    @FXML private TableColumn<Agenda, String> colFecha;
+    @FXML private TableColumn<Agenda, String> colHora;
+    @FXML private TableColumn<Agenda, String> colTaller;
+    @FXML private TableColumn<Agenda, String> colResponsable;
 
-    @FXML private TextField tfFecha, tfHora, tfTaller, tfResponsable;
-    @FXML private Button btnCrear, btnActualizar, btnEliminar, btnRefrescar;
+    @FXML private DatePicker dpFecha;
+    @FXML private TextField tfHora;
+    @FXML private ComboBox<Taller> cbTaller;
+    @FXML private ComboBox<Usuario> cbResponsable;
+
+    @FXML private Button btnCrear;
+    @FXML private Button btnActualizar;
+    @FXML private Button btnEliminar;
+    @FXML private Button btnRefrescar;
 
     private RESTClient client;
-    private final ObservableList<Agenda> data = FXCollections.observableArrayList();
+    private final ObservableList<Agenda> agendaList = FXCollections.observableArrayList();
+    private final ObservableList<Taller> talleres = FXCollections.observableArrayList();
+    private final ObservableList<Usuario> usuarios = FXCollections.observableArrayList();
 
-    public void setClient(RESTClient c) { this.client = c; }
+    public void setClient(RESTClient client) {
+        this.client = client;
+        loadTalleres();
+        loadUsuarios();
+        loadData();
+    }
 
     @FXML
     public void initialize() {
-        colId.setCellValueFactory(d -> d.getValue().idProperty());
-        colFecha.setCellValueFactory(d -> d.getValue().fechaProperty());
-        colHora.setCellValueFactory(d -> d.getValue().horaProperty());
-        colTaller.setCellValueFactory(d -> d.getValue().tallerProperty());
-        colResponsable.setCellValueFactory(d -> d.getValue().responsableProperty());
+        // Configurar columnas
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
+        colHora.setCellValueFactory(new PropertyValueFactory<>("hora"));
+        colTaller.setCellValueFactory(cell -> 
+            new SimpleStringProperty(cell.getValue().getTaller() != null ?
+                cell.getValue().getTaller().getNombre() : "")
+        );
+        colResponsable.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getResponsable() != null ?
+                cell.getValue().getResponsable().getNombre() : "")
+        );
 
-        tableAgenda.setItems(data);
-
-        btnRefrescar.setOnAction(e -> loadData());
+        // Botones
         btnCrear.setOnAction(e -> crear());
         btnActualizar.setOnAction(e -> actualizar());
         btnEliminar.setOnAction(e -> eliminar());
+        btnRefrescar.setOnAction(e -> loadData());
+
+        // Selección de tabla
+        tableAgenda.getSelectionModel().selectedItemProperty().addListener(
+            (obs, oldSel, newSel) -> fillForm(newSel)
+        );
     }
 
-    public void loadData() {
+    private void loadTalleres() {
         try {
-            data.clear();
-            var list = client.listAgenda();
-            for (var map : list) {
-                Map<String,Object> tallerMap = (Map<String,Object>) map.get("taller");
-                Map<String,Object> respMap = (Map<String,Object>) map.get("responsable");
-                data.add(new Agenda(
-                        String.valueOf(map.get("id")),
-                        (String) map.get("fecha"),
-                        (String) map.get("hora"),
-                        tallerMap != null ? (String) tallerMap.get("nombre") : "",
-                        respMap != null ? (String) respMap.get("nombre") : ""
-                ));
-            }
-        } catch (Exception e) {
-            alertError("Error cargando agenda", e);
-        }
+            List<Taller> lista = client.listTalleres();
+            talleres.setAll(lista);
+            cbTaller.setItems(talleres);
+            cbTaller.setConverter(new StringConverter<>() {
+                @Override public String toString(Taller t) { return t != null ? t.getNombre() : ""; }
+                @Override public Taller fromString(String s) { return null; }
+            });
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    private void crear() {
-        if (!validarCampos()) return;
+    private void loadUsuarios() {
         try {
-            Map<String,String> body = new HashMap<>();
-            body.put("fecha", tfFecha.getText());
-            body.put("hora", tfHora.getText());
-            body.put("taller", tfTaller.getText());
-            body.put("responsable", tfResponsable.getText());
-            client.crearAgenda(body);
-            loadData();
-            limpiarCampos();
-        } catch (Exception e) {
-            alertError("Error creando agenda", e);
-        }
+            List<Usuario> lista = client.listUsuarios();
+            usuarios.setAll(lista);
+            cbResponsable.setItems(usuarios);
+            cbResponsable.setConverter(new StringConverter<>() {
+                @Override public String toString(Usuario u) { return u != null ? u.getNombre() : ""; }
+                @Override public Usuario fromString(String s) { return null; }
+            });
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    private void actualizar() {
-        Agenda a = tableAgenda.getSelectionModel().getSelectedItem();
-        if (a == null) return;
-        if (!validarCampos()) return;
+    private void loadData() {
         try {
-            Map<String,String> body = new HashMap<>();
-            body.put("fecha", tfFecha.getText());
-            body.put("hora", tfHora.getText());
-            body.put("taller", tfTaller.getText());
-            body.put("responsable", tfResponsable.getText());
-            client.actualizarAgenda(Long.parseLong(a.getId()), body);
-            loadData();
-            limpiarCampos();
-        } catch (Exception e) {
-            alertError("Error actualizando agenda", e);
-        }
+            List<Agenda> lista = client.listAgendas();
+            agendaList.setAll(lista);
+            tableAgenda.setItems(agendaList);
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    private void eliminar() {
-        Agenda a = tableAgenda.getSelectionModel().getSelectedItem();
-        if (a == null) return;
-        try {
-            client.eliminarAgenda(Long.parseLong(a.getId()));
-            loadData();
-            limpiarCampos();
-        } catch (Exception e) {
-            alertError("Error eliminando agenda", e);
-        }
+    private void fillForm(Agenda agenda) {
+        if (agenda == null) return;
+        dpFecha.setValue(LocalDate.parse(agenda.getFecha()));
+        tfHora.setText(agenda.getHora());
+        cbTaller.getSelectionModel().select(agenda.getTaller());
+        cbResponsable.getSelectionModel().select(agenda.getResponsable());
     }
 
     private boolean validarCampos() {
-        if (tfFecha.getText().isBlank() || tfHora.getText().isBlank() || tfTaller.getText().isBlank() || tfResponsable.getText().isBlank()) {
-            new Alert(AlertType.WARNING, "Todos los campos deben completarse").showAndWait();
+        if (dpFecha.getValue() == null || tfHora.getText().isEmpty() ||
+            cbTaller.getValue() == null || cbResponsable.getValue() == null) {
+            alertError("Error", "Todos los campos son obligatorios");
             return false;
         }
         return true;
     }
 
-    private void limpiarCampos() {
-        tfFecha.clear();
-        tfHora.clear();
-        tfTaller.clear();
-        tfResponsable.clear();
+    private void crear() {
+        if (!validarCampos()) return;
+        try {
+            Map<String,Object> body = new HashMap<>();
+            body.put("fecha", dpFecha.getValue().toString()); 
+            body.put("hora", tfHora.getText());
+            body.put("taller", Map.of("id", cbTaller.getValue().getId()));
+            body.put("responsable", Map.of("id", cbResponsable.getValue().getId()));
+
+            client.crearAgenda(body);
+            loadData();
+            limpiarCampos();
+        } catch (Exception e) { alertError("Error creando agenda", e); }
     }
 
-    private void alertError(String msg, Exception e) {
-        e.printStackTrace();
-        new Alert(AlertType.ERROR, msg + ": " + e.getMessage()).showAndWait();
+    private void actualizar() {
+        Agenda selected = tableAgenda.getSelectionModel().getSelectedItem();
+        if (selected == null) { alertError("Error", "Seleccione una agenda"); return; }
+        if (!validarCampos()) return;
+
+        try {
+            Map<String,Object> body = new HashMap<>();
+            body.put("fecha", dpFecha.getValue().toString());
+            body.put("hora", tfHora.getText());
+            body.put("taller", Map.of("id", cbTaller.getValue().getId()));
+            body.put("responsable", Map.of("id", cbResponsable.getValue().getId()));
+
+            client.actualizarAgenda(selected.getId(), body);
+            loadData();
+            limpiarCampos();
+        } catch (Exception e) { alertError("Error actualizando agenda", e); }
+    }
+
+    private void eliminar() {
+        Agenda selected = tableAgenda.getSelectionModel().getSelectedItem();
+        if (selected == null) { alertError("Error", "Seleccione una agenda"); return; }
+        try {
+            client.eliminarAgenda(selected.getId());
+            loadData();
+            limpiarCampos();
+        } catch (Exception e) { alertError("Error eliminando agenda", e); }
+    }
+
+    private void limpiarCampos() {
+        dpFecha.setValue(null);
+        tfHora.clear();
+        cbTaller.getSelectionModel().clearSelection();
+        cbResponsable.getSelectionModel().clearSelection();
+    }
+
+    private void alertError(String title, Object msg) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg.toString());
+        alert.showAndWait();
     }
 }

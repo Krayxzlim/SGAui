@@ -9,6 +9,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sga.model.Agenda;
+import com.sga.model.Taller;
+import com.sga.model.Usuario;
 
 public class RESTClient {
     private static final String BASE = "http://localhost:8080/api";
@@ -99,13 +102,18 @@ public class RESTClient {
     }
 
     // ---------------- TALLERES ----------------
-    public List<Map<String,Object>> listTalleres() throws Exception {
+    public List<Taller> listTalleres() throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/talleres"))
                 .GET()).build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        return parseResponse(resp, new TypeReference<>() {}, "Error al listar talleres");
+
+        if (resp.statusCode() == 200) {
+            return mapper.readValue(resp.body(), new TypeReference<List<Taller>>() {});
+        } else {
+            throw new RuntimeException("Error al listar talleres: " + resp.body());
+        }
     }
 
     public void crearTaller(Map<String,String> body) throws Exception {
@@ -143,13 +151,18 @@ public class RESTClient {
     }
 
     // ---------------- USUARIOS ----------------
-    public List<Map<String,Object>> listUsuarios() throws Exception {
+    public List<Usuario> listUsuarios() throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/usuarios"))
                 .GET()).build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        return parseResponse(resp, new TypeReference<>() {}, "Error al listar usuarios");
+
+        if (resp.statusCode() == 200) {
+            return mapper.readValue(resp.body(), new TypeReference<List<Usuario>>() {});
+        } else {
+            throw new RuntimeException("Error al listar usuarios: " + resp.body());
+        }
     }
 
     public void crearUsuario(Map<String,String> body) throws Exception {
@@ -197,19 +210,25 @@ public class RESTClient {
     }
 
     // ---------------- AGENDA ----------------
-    public List<Map<String,Object>> listAgenda() throws Exception {
+    public List<Agenda> listAgendas() throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
-                .uri(URI.create(BASE + "/agenda"))
+                .uri(URI.create(BASE + "/agendas"))
                 .GET()).build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        return parseResponse(resp, new TypeReference<>() {}, "Error al listar agenda");
+
+        if (resp.statusCode() == 200) {
+            return mapper.readValue(resp.body(), new TypeReference<List<Agenda>>() {});
+        } else {
+            throw new RuntimeException("Error al listar agenda: " + resp.body());
+        }
     }
 
-    public void crearAgenda(Map<String,String> body) throws Exception {
-        String json = mapper.writeValueAsString(body);
+
+    public void crearAgenda(Map<String,Object> body) throws Exception {
+        String json = mapper.writeValueAsString(body); // Jackson serializa perfectamente un Map<String,Object>
         HttpRequest req = withAuth(HttpRequest.newBuilder()
-                .uri(URI.create(BASE + "/agenda"))
+                .uri(URI.create(BASE + "/agendas"))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json)))
                 .build();
@@ -218,10 +237,11 @@ public class RESTClient {
         if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
     }
 
-    public void actualizarAgenda(Long id, Map<String,String> body) throws Exception {
-        String json = mapper.writeValueAsString(body);
+
+    public void actualizarAgenda(Long id, Map<String,Object> body) throws Exception {
+        String json = mapper.writeValueAsString(body); // Jackson serializa objetos anidados perfectamente
         HttpRequest req = withAuth(HttpRequest.newBuilder()
-                .uri(URI.create(BASE + "/agenda/" + id))
+                .uri(URI.create(BASE + "/agendas/" + id))
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(json)))
                 .build();
@@ -230,9 +250,10 @@ public class RESTClient {
         if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
     }
 
+
     public void eliminarAgenda(Long id) throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
-                .uri(URI.create(BASE + "/agenda/" + id))
+                .uri(URI.create(BASE + "/agendas/" + id))
                 .DELETE())
                 .build();
 
