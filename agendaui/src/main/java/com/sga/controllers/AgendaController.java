@@ -31,12 +31,12 @@ public class AgendaController {
     @FXML private TableColumn<Agenda, String> colFecha;
     @FXML private TableColumn<Agenda, String> colHora;
     @FXML private TableColumn<Agenda, String> colTaller;
-    @FXML private TableColumn<Agenda, String> colResponsable;
+    @FXML private TableColumn<Agenda, String> colTallerista;
 
     @FXML private DatePicker dpFecha;
     @FXML private TextField tfHora;
     @FXML private ComboBox<Taller> cbTaller;
-    @FXML private ComboBox<Usuario> cbResponsable;
+    @FXML private ComboBox<Usuario> cbTallerista;
 
     @FXML private Button btnCrear;
     @FXML private Button btnActualizar;
@@ -65,9 +65,9 @@ public class AgendaController {
             new SimpleStringProperty(cell.getValue().getTaller() != null ?
                 cell.getValue().getTaller().getNombre() : "")
         );
-        colResponsable.setCellValueFactory(cell ->
-            new SimpleStringProperty(cell.getValue().getResponsable() != null ?
-                cell.getValue().getResponsable().getNombre() : "")
+        colTallerista.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getTallerista() != null ?
+                cell.getValue().getTallerista().getNombre() : "")
         );
 
         // Botones
@@ -98,8 +98,8 @@ public class AgendaController {
         try {
             List<Usuario> lista = client.listUsuarios();
             usuarios.setAll(lista);
-            cbResponsable.setItems(usuarios);
-            cbResponsable.setConverter(new StringConverter<>() {
+            cbTallerista.setItems(usuarios);
+            cbTallerista.setConverter(new StringConverter<>() {
                 @Override public String toString(Usuario u) { return u != null ? u.getNombre() : ""; }
                 @Override public Usuario fromString(String s) { return null; }
             });
@@ -119,12 +119,12 @@ public class AgendaController {
         dpFecha.setValue(LocalDate.parse(agenda.getFecha()));
         tfHora.setText(agenda.getHora());
         cbTaller.getSelectionModel().select(agenda.getTaller());
-        cbResponsable.getSelectionModel().select(agenda.getResponsable());
+        cbTallerista.getSelectionModel().select(agenda.getTallerista());
     }
 
     private boolean validarCampos() {
         if (dpFecha.getValue() == null || tfHora.getText().isEmpty() ||
-            cbTaller.getValue() == null || cbResponsable.getValue() == null) {
+            cbTaller.getValue() == null || cbTallerista.getValue() == null) {
             alertError("Error", "Todos los campos son obligatorios");
             return false;
         }
@@ -138,7 +138,7 @@ public class AgendaController {
             body.put("fecha", dpFecha.getValue().toString()); 
             body.put("hora", tfHora.getText());
             body.put("taller", Map.of("id", cbTaller.getValue().getId()));
-            body.put("responsable", Map.of("id", cbResponsable.getValue().getId()));
+            body.put("tallerista", Map.of("id", cbTallerista.getValue().getId()));
 
             client.crearAgenda(body);
             loadData();
@@ -156,7 +156,7 @@ public class AgendaController {
             body.put("fecha", dpFecha.getValue().toString());
             body.put("hora", tfHora.getText());
             body.put("taller", Map.of("id", cbTaller.getValue().getId()));
-            body.put("responsable", Map.of("id", cbResponsable.getValue().getId()));
+            body.put("Tallerista", Map.of("id", cbTallerista.getValue().getId()));
 
             client.actualizarAgenda(selected.getId(), body);
             loadData();
@@ -178,7 +178,7 @@ public class AgendaController {
         dpFecha.setValue(null);
         tfHora.clear();
         cbTaller.getSelectionModel().clearSelection();
-        cbResponsable.getSelectionModel().clearSelection();
+        cbTallerista.getSelectionModel().clearSelection();
     }
 
     private void alertError(String title, Object msg) {

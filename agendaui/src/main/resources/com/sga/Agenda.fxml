@@ -18,7 +18,7 @@
             <TableColumn fx:id="colFecha" text="Fecha" prefWidth="100"/>
             <TableColumn fx:id="colHora" text="Hora" prefWidth="80"/>
             <TableColumn fx:id="colTaller" text="Taller" prefWidth="200"/>
-            <TableColumn fx:id="colResponsable" text="Responsable" prefWidth="200"/>
+            <TableColumn fx:id="colTallerista" text="Tallerista" prefWidth="200"/>
         </columns>
     </TableView>
 
@@ -29,8 +29,8 @@
         <TextField fx:id="tfHora" promptText="HH:mm" prefWidth="80"/>
         <Label text="Taller:"/>
         <ComboBox fx:id="cbTaller" prefWidth="150"/>
-        <Label text="Responsable:"/>
-        <ComboBox fx:id="cbResponsable" prefWidth="150"/>
+        <Label text="Tallerista:"/>
+        <ComboBox fx:id="cbTallerista" prefWidth="150"/>
     </HBox>
 
     <HBox spacing="10">
