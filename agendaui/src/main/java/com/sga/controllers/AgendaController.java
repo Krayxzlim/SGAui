@@ -57,11 +57,9 @@ public class AgendaController {
 
     @FXML
     public void initialize() {
-        // Configurar columnas
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
         colHora.setCellValueFactory(new PropertyValueFactory<>("hora"));
-        colTaller.setCellValueFactory(cell -> 
+        colTaller.setCellValueFactory(cell ->
             new SimpleStringProperty(cell.getValue().getTaller() != null ?
                 cell.getValue().getTaller().getNombre() : "")
         );
@@ -70,13 +68,11 @@ public class AgendaController {
                 cell.getValue().getTallerista().getNombre() : "")
         );
 
-        // Botones
         btnCrear.setOnAction(e -> crear());
         btnActualizar.setOnAction(e -> actualizar());
         btnEliminar.setOnAction(e -> eliminar());
         btnRefrescar.setOnAction(e -> loadData());
 
-        // Selección de tabla
         tableAgenda.getSelectionModel().selectedItemProperty().addListener(
             (obs, oldSel, newSel) -> fillForm(newSel)
         );
@@ -85,13 +81,18 @@ public class AgendaController {
     private void loadTalleres() {
         try {
             List<Taller> lista = client.listTalleres();
+            if (lista == null || lista.isEmpty()) {
+                alertError("Atención", "No hay talleres disponibles o ocurrió un error al cargarlos.");
+            }
             talleres.setAll(lista);
             cbTaller.setItems(talleres);
             cbTaller.setConverter(new StringConverter<>() {
                 @Override public String toString(Taller t) { return t != null ? t.getNombre() : ""; }
                 @Override public Taller fromString(String s) { return null; }
             });
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            alertError("Error cargando talleres", e.getMessage());
+        }
     }
 
     private void loadUsuarios() {
@@ -100,10 +101,14 @@ public class AgendaController {
             usuarios.setAll(lista);
             cbTallerista.setItems(usuarios);
             cbTallerista.setConverter(new StringConverter<>() {
-                @Override public String toString(Usuario u) { return u != null ? u.getNombre() : ""; }
+                @Override public String toString(Usuario u) {
+                    return u != null ? u.getNombre() + " (" + u.getRol() + ")" : "";
+                }
                 @Override public Usuario fromString(String s) { return null; }
             });
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            alertError("Error cargando usuarios", e.getMessage());
+        }
     }
 
     private void loadData() {
@@ -111,7 +116,9 @@ public class AgendaController {
             List<Agenda> lista = client.listAgendas();
             agendaList.setAll(lista);
             tableAgenda.setItems(agendaList);
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            alertError("Error cargando agendas", e.getMessage());
+        }
     }
 
     private void fillForm(Agenda agenda) {
@@ -135,7 +142,7 @@ public class AgendaController {
         if (!validarCampos()) return;
         try {
             Map<String,Object> body = new HashMap<>();
-            body.put("fecha", dpFecha.getValue().toString()); 
+            body.put("fecha", dpFecha.getValue().toString());
             body.put("hora", tfHora.getText());
             body.put("taller", Map.of("id", cbTaller.getValue().getId()));
             body.put("tallerista", Map.of("id", cbTallerista.getValue().getId()));
@@ -143,12 +150,17 @@ public class AgendaController {
             client.crearAgenda(body);
             loadData();
             limpiarCampos();
-        } catch (Exception e) { alertError("Error creando agenda", e); }
+        } catch (Exception e) {
+            alertError("Error creando agenda", e.getMessage());
+        }
     }
 
     private void actualizar() {
         Agenda selected = tableAgenda.getSelectionModel().getSelectedItem();
-        if (selected == null) { alertError("Error", "Seleccione una agenda"); return; }
+        if (selected == null) {
+            alertError("Error", "Seleccione una agenda");
+            return;
+        }
         if (!validarCampos()) return;
 
         try {
@@ -156,22 +168,29 @@ public class AgendaController {
             body.put("fecha", dpFecha.getValue().toString());
             body.put("hora", tfHora.getText());
             body.put("taller", Map.of("id", cbTaller.getValue().getId()));
-            body.put("Tallerista", Map.of("id", cbTallerista.getValue().getId()));
+            body.put("tallerista", Map.of("id", cbTallerista.getValue().getId()));
 
             client.actualizarAgenda(selected.getId(), body);
             loadData();
             limpiarCampos();
-        } catch (Exception e) { alertError("Error actualizando agenda", e); }
+        } catch (Exception e) {
+            alertError("Error actualizando agenda", e.getMessage());
+        }
     }
 
     private void eliminar() {
         Agenda selected = tableAgenda.getSelectionModel().getSelectedItem();
-        if (selected == null) { alertError("Error", "Seleccione una agenda"); return; }
+        if (selected == null) {
+            alertError("Error", "Seleccione una agenda");
+            return;
+        }
         try {
             client.eliminarAgenda(selected.getId());
             loadData();
             limpiarCampos();
-        } catch (Exception e) { alertError("Error eliminando agenda", e); }
+        } catch (Exception e) {
+            alertError("Error eliminando agenda", e.getMessage());
+        }
     }
 
     private void limpiarCampos() {
@@ -181,11 +200,11 @@ public class AgendaController {
         cbTallerista.getSelectionModel().clearSelection();
     }
 
-    private void alertError(String title, Object msg) {
+    private void alertError(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(msg.toString());
+        alert.setContentText(msg);
         alert.showAndWait();
     }
 }
