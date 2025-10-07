@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.calendarfx.view.CalendarView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import com.calendarfx.view.CalendarView?>
 
 <VBox xmlns="http://javafx.com/javafx/17.0.2"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.sga.controllers.AgendaController"
-      fx:id="rootContainer"
       spacing="10">
 
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
-    <!-- Filtros y entrada de datos -->
+    <!-- Formulario -->
     <HBox spacing="10">
         <Label text="Fecha:"/>
         <DatePicker fx:id="dpFecha" promptText="yyyy-MM-dd" prefWidth="120"/>
@@ -27,7 +26,7 @@
         <ComboBox fx:id="cbTallerista" prefWidth="150"/>
     </HBox>
 
-    <!-- Botones de acción -->
+    <!-- Botones -->
     <HBox spacing="10">
         <Button fx:id="btnCrear" text="Crear"/>
         <Button fx:id="btnActualizar" text="Actualizar"/>
@@ -35,18 +34,7 @@
         <Button fx:id="btnRefrescar" text="Refrescar"/>
     </HBox>
 
-    <!-- Tabla de agendas -->
-    <TableView fx:id="tableAgenda" prefHeight="300">
-        <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
-            <TableColumn fx:id="colFecha" text="Fecha" prefWidth="100"/>
-            <TableColumn fx:id="colHora" text="Hora" prefWidth="80"/>
-            <TableColumn fx:id="colTaller" text="Taller" prefWidth="150"/>
-            <TableColumn fx:id="colTallerista" text="Tallerista" prefWidth="150"/>
-        </columns>
-    </TableView>
-
-    <!-- Calendario visual (CalendarFX) -->
+    <!-- Calendario -->
     <CalendarView fx:id="calendarView" prefHeight="600" />
 
 </VBox>

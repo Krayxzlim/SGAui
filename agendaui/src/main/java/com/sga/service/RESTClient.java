@@ -21,6 +21,11 @@ public class RESTClient {
 
     public void setToken(String t) { this.token = t; }
 
+    public String getToken() {
+        return token;
+    }
+
+
     // ---------------- LOGIN ----------------
     public String login(String email, String password) throws Exception {
         var reqMap = Map.of("email", email, "password", password);
@@ -43,7 +48,6 @@ public class RESTClient {
         }
     }
 
-    // ---------------- GENERIC HELPERS ----------------
     private HttpRequest.Builder withAuth(HttpRequest.Builder builder) {
         if (token != null) builder.header("Authorization", "Bearer " + token);
         return builder;

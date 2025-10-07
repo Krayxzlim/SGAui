@@ -5,6 +5,9 @@ module com.sga {
     requires javafx.controls;
     requires javafx.fxml;
 
+    // Esto es lo que falta
+    requires com.calendarfx.view;
+
     opens com.sga.controllers to javafx.fxml;
     opens com.sga to javafx.fxml;
     opens com.sga.model to javafx.fxml;
