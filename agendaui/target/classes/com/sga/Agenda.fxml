@@ -22,8 +22,8 @@
         <TextField fx:id="tfHora" promptText="HH:mm" prefWidth="80"/>
         <Label text="Taller:"/>
         <ComboBox fx:id="cbTaller" prefWidth="150"/>
-        <Label text="Tallerista:"/>
-        <ComboBox fx:id="cbTallerista" prefWidth="150"/>
+        <Label text="Colegio:"/>
+        <ComboBox fx:id="cbColegio" prefWidth="150"/>
     </HBox>
 
     <!-- Botones -->

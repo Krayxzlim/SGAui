@@ -8,23 +8,22 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-
 public class Agenda {
 
     private final LongProperty id = new SimpleLongProperty();
     private final StringProperty fecha = new SimpleStringProperty();
     private final StringProperty hora = new SimpleStringProperty();
     private Taller taller;
-    private Usuario tallerista;
+    private Colegio colegio;
 
     public Agenda() {}
 
-    public Agenda(long id, String fecha, String hora, Taller taller, Usuario tallerista) {
+    public Agenda(long id, String fecha, String hora, Taller taller, Colegio colegio) {
         this.id.set(id);
         this.fecha.set(fecha);
         this.hora.set(hora);
         this.taller = taller;
-        this.tallerista = tallerista;
+        this.colegio = colegio;
     }
 
     // ID
@@ -46,7 +45,7 @@ public class Agenda {
     public Taller getTaller() { return taller; }
     public void setTaller(Taller taller) { this.taller = taller; }
 
-    // tallerista
-    public Usuario getTallerista() { return tallerista; }
-    public void setTallerista(Usuario tallerista) { this.tallerista = tallerista; }
+    // Colegio
+    public Colegio getColegio() { return colegio; }
+    public void setColegio(Colegio colegio) { this.colegio = colegio; }
 }
