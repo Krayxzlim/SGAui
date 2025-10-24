@@ -1,31 +1,39 @@
 package com.sga.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public class Taller {
-    private Long id;
-    private String nombre;
-    private String descripcion;
+
+    private final LongProperty id = new SimpleLongProperty();
+    private final StringProperty nombre = new SimpleStringProperty();
+    private final StringProperty descripcion = new SimpleStringProperty();
 
     public Taller() {}
 
     public Taller(Long id, String nombre, String descripcion) {
-        this.id = id;
-        this.nombre = nombre;
-        this.descripcion = descripcion;
+        this.id.set(id);
+        this.nombre.set(nombre);
+        this.descripcion.set(descripcion);
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // ID
+    public Long getId() { return id.get(); }
+    public void setId(Long id) { this.id.set(id); }
+    public LongProperty idProperty() { return id; }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    // Nombre
+    public String getNombre() { return nombre.get(); }
+    public void setNombre(String nombre) { this.nombre.set(nombre); }
+    public StringProperty nombreProperty() { return nombre; }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    // Descripción
+    public String getDescripcion() { return descripcion.get(); }
+    public void setDescripcion(String descripcion) { this.descripcion.set(descripcion); }
+    public StringProperty descripcionProperty() { return descripcion; }
 
     @Override
-    public String toString() { return nombre; }
+    public String toString() { return nombre.get(); }
 }

@@ -5,7 +5,6 @@ import java.util.Map;
 import com.sga.model.Colegio;
 import com.sga.service.RESTClient;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -27,29 +26,25 @@ public class ColegiosController {
     @FXML private Button btnCrear, btnActualizar, btnEliminar, btnRefrescar;
 
     private RESTClient client;
-    private final ObservableList<Colegio> data = FXCollections.observableArrayList();
+    private ObservableList<Colegio> colegios;
 
-    public void setClient(RESTClient client) {
+    public void setData(RESTClient client, ObservableList<Colegio> colegios) {
         this.client = client;
-        loadData(); // cargar datos apenas se asigna el cliente
+        this.colegios = colegios;
+        tableColegios.setItems(colegios);
+        loadData();
     }
 
     @FunctionalInterface
-    interface ActionWithException {
-        void run() throws Exception;
-    }
+    interface ActionWithException { void run() throws Exception; }
 
     @FXML
     public void initialize() {
-        // Configurar columnas
         colId.setCellValueFactory(d -> d.getValue().idProperty());
         colNombre.setCellValueFactory(d -> d.getValue().nombreProperty());
         colDireccion.setCellValueFactory(d -> d.getValue().direccionProperty());
         colContacto.setCellValueFactory(d -> d.getValue().contactoProperty());
 
-        tableColegios.setItems(data);
-
-        // Listener para selección
         tableColegios.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
                 tfNombre.setText(newSel.getNombre());
@@ -62,7 +57,6 @@ public class ColegiosController {
             }
         });
 
-        // Botones
         btnRefrescar.setOnAction(e -> loadData());
         btnCrear.setOnAction(e -> handleAction(this::createColegio));
         btnActualizar.setOnAction(e -> handleAction(this::updateColegio));
@@ -83,10 +77,9 @@ public class ColegiosController {
 
     public void loadData() {
         if (client == null) return;
-
         try {
-            data.clear();
-            client.listColegios().forEach(map -> data.add(
+            colegios.clear();
+            client.listColegios().forEach(map -> colegios.add(
                 new Colegio(
                     String.valueOf(map.get("id")),
                     (String) map.get("nombre"),
@@ -94,43 +87,33 @@ public class ColegiosController {
                     map.get("contacto") != null ? (String) map.get("contacto") : ""
                 )
             ));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void createColegio() throws Exception {
-        if (tfNombre.getText().isBlank())
-            throw new RuntimeException("El nombre es obligatorio");
-
+        if (tfNombre.getText().isBlank()) throw new RuntimeException("El nombre es obligatorio");
         Map<String,String> body = Map.of(
             "nombre", tfNombre.getText(),
             "direccion", tfDireccion.getText(),
             "contacto", tfContacto.getText()
         );
-
         client.crearColegio(body);
     }
 
     private void updateColegio() throws Exception {
         Colegio c = tableColegios.getSelectionModel().getSelectedItem();
-        if (c == null)
-            throw new RuntimeException("Debe seleccionar un colegio para actualizar");
-
+        if (c == null) throw new RuntimeException("Seleccione un colegio para actualizar");
         Map<String,String> body = Map.of(
             "nombre", tfNombre.getText(),
             "direccion", tfDireccion.getText(),
             "contacto", tfContacto.getText()
         );
-
         client.actualizarColegio(Long.parseLong(c.getId()), body);
     }
 
     private void deleteColegio() throws Exception {
         Colegio c = tableColegios.getSelectionModel().getSelectedItem();
-        if (c == null)
-            throw new RuntimeException("Debe seleccionar un colegio para eliminar");
-
+        if (c == null) throw new RuntimeException("Seleccione un colegio para eliminar");
         client.eliminarColegio(Long.parseLong(c.getId()));
     }
 }

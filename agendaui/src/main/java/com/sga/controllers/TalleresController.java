@@ -5,11 +5,11 @@ import java.util.Map;
 import com.sga.model.Taller;
 import com.sga.service.RESTClient;
 
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -17,28 +17,38 @@ import javafx.scene.control.TextField;
 public class TalleresController {
 
     @FXML private TableView<Taller> tableTalleres;
-    @FXML private TableColumn<Taller,String> colId;
+    @FXML private TableColumn<Taller,Long> colId;
     @FXML private TableColumn<Taller,String> colNombre;
     @FXML private TableColumn<Taller,String> colDescripcion;
+
     @FXML private TextField tfNombre, tfDescripcion;
     @FXML private Button btnCrear, btnActualizar, btnEliminar, btnRefrescar;
 
     private RESTClient client;
-    private final ObservableList<Taller> data = FXCollections.observableArrayList();
+    private ObservableList<Taller> talleres; // compartida
 
-    public void setClient(RESTClient client) { this.client = client; }
-
-    @FunctionalInterface
-    interface ActionWithException {
-        void run() throws Exception;
+    public void setData(RESTClient client, ObservableList<Taller> talleres) {
+        this.client = client;
+        this.talleres = talleres;
+        tableTalleres.setItems(talleres);
+        loadData();
     }
 
     @FXML
     public void initialize() {
-        colId.setCellValueFactory(d -> new ReadOnlyStringWrapper(String.valueOf(d.getValue().getId())));
-        colNombre.setCellValueFactory(d -> new ReadOnlyStringWrapper(d.getValue().getNombre()));
-        colDescripcion.setCellValueFactory(d -> new ReadOnlyStringWrapper(d.getValue().getDescripcion()));
-        tableTalleres.setItems(data);
+        colId.setCellValueFactory(d -> d.getValue().idProperty().asObject());
+        colNombre.setCellValueFactory(d -> d.getValue().nombreProperty());
+        colDescripcion.setCellValueFactory(d -> d.getValue().descripcionProperty());
+
+        tableTalleres.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                tfNombre.setText(newSel.getNombre());
+                tfDescripcion.setText(newSel.getDescripcion());
+            } else {
+                tfNombre.clear();
+                tfDescripcion.clear();
+            }
+        });
 
         btnRefrescar.setOnAction(e -> loadData());
         btnCrear.setOnAction(e -> handleAction(this::createTaller));
@@ -46,44 +56,52 @@ public class TalleresController {
         btnEliminar.setOnAction(e -> handleAction(this::deleteTaller));
     }
 
-    private void handleAction(ActionWithException action) {
+    private void handleAction(Action action) {
         try {
             action.run();
             loadData();
+            tableTalleres.getSelectionModel().clearSelection();
         } catch (Exception e) {
             e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
+            alert.showAndWait();
         }
     }
 
     public void loadData() {
+        if (client == null) return;
         try {
-            data.clear();
-            data.addAll(client.listTalleres()); // ya devuelve List<Taller>
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            talleres.clear();
+            client.listTalleres().forEach(t -> talleres.add(t));
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-
     private void createTaller() throws Exception {
-        client.crearTaller(Map.of(
-                "nombre", tfNombre.getText(),
-                "descripcion", tfDescripcion.getText()
-        ));
+        if (tfNombre.getText().isBlank()) throw new RuntimeException("El nombre es obligatorio");
+        Map<String,String> body = Map.of(
+            "nombre", tfNombre.getText(),
+            "descripcion", tfDescripcion.getText()
+        );
+        client.crearTaller(body);
     }
 
     private void updateTaller() throws Exception {
         Taller t = tableTalleres.getSelectionModel().getSelectedItem();
-        if (t == null) return;
-        client.actualizarTaller(t.getId(), Map.of(
-                "nombre", tfNombre.getText(),
-                "descripcion", tfDescripcion.getText()
-        ));
+        if (t == null) throw new RuntimeException("Seleccione un taller para actualizar");
+        Map<String,String> body = Map.of(
+            "nombre", tfNombre.getText(),
+            "descripcion", tfDescripcion.getText()
+        );
+        client.actualizarTaller(t.getId(), body);
+
     }
 
     private void deleteTaller() throws Exception {
         Taller t = tableTalleres.getSelectionModel().getSelectedItem();
-        if (t == null) return;
-        client.eliminarTaller(t.getId());
+        if (t == null) throw new RuntimeException("Seleccione un taller para eliminar");
+        client.eliminarTaller((t.getId()));
     }
+
+    @FunctionalInterface
+    interface Action { void run() throws Exception; }
 }

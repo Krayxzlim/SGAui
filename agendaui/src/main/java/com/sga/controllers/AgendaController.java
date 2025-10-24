@@ -15,8 +15,8 @@ import com.sga.model.Colegio;
 import com.sga.model.Taller;
 import com.sga.service.RESTClient;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -32,107 +32,97 @@ public class AgendaController {
     @FXML private TextField tfHora;
     @FXML private ComboBox<Taller> cbTaller;
     @FXML private ComboBox<Colegio> cbColegio;
-
     @FXML private Button btnCrear;
     @FXML private Button btnActualizar;
     @FXML private Button btnEliminar;
     @FXML private Button btnRefrescar;
-
     @FXML private CalendarView calendarView;
 
     private RESTClient client;
-    private final ObservableList<Taller> talleres = FXCollections.observableArrayList();
-    private final ObservableList<Colegio> colegios = FXCollections.observableArrayList();
-
-    private Calendar<Agenda> agendaCalendar = new Calendar<>("Agendas");
-
+    private ObservableList<Taller> talleres;
+    private ObservableList<Colegio> colegios;
+    private final Calendar<Agenda> agendaCalendar = new Calendar<>("Agendas");
 
     private Agenda selectedAgenda;
 
-    public void setClient(RESTClient client) {
+    // Inyección de listas compartidas
+    public void setData(RESTClient client, ObservableList<Taller> talleres, ObservableList<Colegio> colegios) {
         this.client = client;
-        loadTalleres();
-        loadColegios();
+        this.talleres = talleres;
+        this.colegios = colegios;
+
+        cbTaller.setItems(talleres);
+        cbColegio.setItems(colegios);
+
         loadCalendar();
     }
 
     @FXML
     public void initialize() {
-        // Configura ComboBoxes
         cbTaller.setConverter(new StringConverter<>() {
             @Override public String toString(Taller t) { return t != null ? t.getNombre() : ""; }
             @Override public Taller fromString(String s) { return null; }
         });
 
         cbColegio.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(Colegio c) {
-                return c != null ? c.getNombre() : "";
-            }
-
-            @Override
-            public Colegio fromString(String s) {
-                return null;
-            }
+            @Override public String toString(Colegio c) { return c != null ? c.getNombre() : ""; }
+            @Override public Colegio fromString(String s) { return null; }
         });
 
-        // Botones
         btnCrear.setOnAction(e -> crear());
         btnActualizar.setOnAction(e -> actualizar());
         btnEliminar.setOnAction(e -> eliminar());
         btnRefrescar.setOnAction(e -> loadCalendar());
 
-        // Calendario
         calendarView.getCalendarSources().clear();
         CalendarSource source = new CalendarSource("Mis Calendarios");
         source.getCalendars().add(agendaCalendar);
         calendarView.getCalendarSources().add(source);
         calendarView.setRequestedTime(LocalTime.now());
 
-        // Selección de Entry
         agendaCalendar.addEventHandler(evt -> {
             @SuppressWarnings("unchecked")
-            Entry<Agenda> e = (Entry<Agenda>) evt.getEntry();
-            if (e != null) {
-                selectedAgenda = e.getUserObject();
+            Entry<Agenda> entry = (Entry<Agenda>) evt.getEntry();
+            if (entry != null && entry.getUserObject() != null) {
+                selectedAgenda = entry.getUserObject();
                 fillForm(selectedAgenda);
+            }
+        });
+
+        agendaCalendar.addEventHandler(evt -> {
+            Entry<?> entry = evt.getEntry();
+            if (entry == null) return;
+
+            var type = evt.getEventType();
+            switch (type.getName()) {
+                case "ENTRY_INTERVAL_CHANGED":
+                case "ENTRY_TITLE_CHANGED":
+                case "ENTRY_START_TIME_CHANGED":
+                case "ENTRY_END_TIME_CHANGED":
+                    handleCalendarEntrySave(entry);
+                    break;
+                case "ENTRY_REMOVED":
+                    handleCalendarEntryDelete(entry);
+                    break;
+            }
+        });
+
+        calendarView.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.DELETE) {
+                ObservableSet<Entry<?>> selectedEntries = calendarView.getSelections();
+                if (!selectedEntries.isEmpty()) {
+                    Entry<?> selectedEntry = selectedEntries.iterator().next();
+                    handleCalendarEntryDelete(selectedEntry);
+                    loadCalendar();
+                    limpiarCampos();
+                    event.consume();
+                }
             }
         });
     }
 
-
-    private void loadTalleres() {
-        try {
-            List<Taller> lista = client.listTalleres();
-            talleres.setAll(lista);
-            cbTaller.setItems(talleres);
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-
-    private void loadColegios() {
-        try {
-            List<Map<String, Object>> data = client.listColegios();
-
-            List<Colegio> lista = data.stream()
-                    .map(map -> {
-                        Colegio c = new Colegio();
-                        c.setId(String.valueOf(((Number) map.get("id")).longValue()));
-                        c.setNombre((String) map.get("nombre"));
-                        return c;
-                    })
-                    .toList();
-
-            colegios.setAll(lista);
-            cbColegio.setItems(colegios);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
     private void loadCalendar() {
+        if (client == null) return;
         try {
             agendaCalendar.clear();
             List<Agenda> lista = client.listAgendas();
@@ -161,8 +151,8 @@ public class AgendaController {
     }
 
     private boolean validarCampos() {
-        if (dpFecha.getValue() == null || tfHora.getText().isEmpty() ||
-            cbTaller.getValue() == null || cbColegio.getValue() == null) {
+        if (dpFecha.getValue() == null || tfHora.getText().isEmpty()
+                || cbTaller.getValue() == null || cbColegio.getValue() == null) {
             alertError("Error", "Todos los campos son obligatorios");
             return false;
         }
@@ -172,13 +162,12 @@ public class AgendaController {
     private void crear() {
         if (!validarCampos()) return;
         try {
-            Map<String,Object> body = Map.of(
+            Map<String, Object> body = Map.of(
                 "fecha", dpFecha.getValue().toString(),
                 "hora", tfHora.getText(),
                 "taller", Map.of("id", cbTaller.getValue().getId()),
                 "colegio", Map.of("id", cbColegio.getValue().getId())
             );
-
             client.crearAgenda(body);
             loadCalendar();
             limpiarCampos();
@@ -188,15 +177,13 @@ public class AgendaController {
     private void actualizar() {
         if (selectedAgenda == null) { alertError("Error", "Seleccione una agenda"); return; }
         if (!validarCampos()) return;
-
         try {
-            Map<String,Object> body = Map.of(
+            Map<String, Object> body = Map.of(
                 "fecha", dpFecha.getValue().toString(),
                 "hora", tfHora.getText(),
                 "taller", Map.of("id", cbTaller.getValue().getId()),
                 "colegio", Map.of("id", cbColegio.getValue().getId())
             );
-
             client.actualizarAgenda(selectedAgenda.getId(), body);
             loadCalendar();
             limpiarCampos();
@@ -220,6 +207,41 @@ public class AgendaController {
         selectedAgenda = null;
     }
 
+    private void handleCalendarEntrySave(Entry<?> entry) {
+        try {
+            LocalDate date = entry.getStartDate();
+            LocalTime time = entry.getStartTime();
+            String title = entry.getTitle();
+            if (title == null || !title.contains("-")) return;
+
+            String[] partes = title.split("-", 2);
+            Taller taller = talleres.stream().filter(t -> t.getNombre().equalsIgnoreCase(partes[0].trim())).findFirst().orElse(null);
+            Colegio colegio = colegios.stream().filter(c -> c.getNombre().equalsIgnoreCase(partes[1].trim())).findFirst().orElse(null);
+            if (taller == null || colegio == null) return;
+
+            Map<String, Object> body = Map.of(
+                "fecha", date.toString(),
+                "hora", time.toString(),
+                "taller", Map.of("id", taller.getId()),
+                "colegio", Map.of("id", colegio.getId())
+            );
+
+            if (entry.getUserObject() != null) {
+                client.actualizarAgenda(((Agenda) entry.getUserObject()).getId(), body);
+            } else {
+                client.crearAgenda(body);
+            }
+
+            loadCalendar();
+        } catch (Exception e) { alertError("Error guardando evento", e); }
+    }
+
+    private void handleCalendarEntryDelete(Entry<?> entry) {
+        try {
+            if (entry.getUserObject() != null)
+                client.eliminarAgenda(((Agenda) entry.getUserObject()).getId());
+        } catch (Exception e) { alertError("Error eliminando evento", e); }
+    }
 
     private void alertError(String title, Object msg) {
         Alert alert = new Alert(AlertType.ERROR);
