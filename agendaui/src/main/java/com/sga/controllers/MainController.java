@@ -1,5 +1,7 @@
 package com.sga.controllers;
 
+import java.net.URL;
+
 import com.sga.model.Colegio;
 import com.sga.model.Taller;
 import com.sga.service.RESTClient;

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.VBox?>
 <?import com.calendarfx.view.CalendarView?>
 
 <VBox xmlns="http://javafx.com/javafx/17.0.2"
@@ -10,31 +8,6 @@
       fx:controller="com.sga.controllers.AgendaController"
       spacing="10">
 
-    <padding>
-        <Insets top="10" right="10" bottom="10" left="10"/>
-    </padding>
-
-    <!-- Formulario -->
-    <HBox spacing="10">
-        <Label text="Fecha:"/>
-        <DatePicker fx:id="dpFecha" promptText="yyyy-MM-dd" prefWidth="120"/>
-        <Label text="Hora:"/>
-        <TextField fx:id="tfHora" promptText="HH:mm" prefWidth="80"/>
-        <Label text="Taller:"/>
-        <ComboBox fx:id="cbTaller" prefWidth="150"/>
-        <Label text="Colegio:"/>
-        <ComboBox fx:id="cbColegio" prefWidth="150"/>
-    </HBox>
-
-    <!-- Botones -->
-    <HBox spacing="10">
-        <Button fx:id="btnCrear" text="Crear"/>
-        <Button fx:id="btnActualizar" text="Actualizar"/>
-        <Button fx:id="btnEliminar" text="Eliminar"/>
-        <Button fx:id="btnRefrescar" text="Refrescar"/>
-    </HBox>
-
-    <!-- Calendario -->
     <CalendarView fx:id="calendarView" prefHeight="600" />
 
 </VBox>
