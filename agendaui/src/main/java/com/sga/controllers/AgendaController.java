@@ -85,12 +85,14 @@ public void initialize() {
 
     calendarView.setEntryFactory(param -> {
         LocalDate date = param.getZonedDateTime().toLocalDate();
-        Entry<Agenda> newEntry = showNewAgendaDialog(date, null);
-        if (newEntry == null) {
-            Entry<Agenda> dummy = new Entry<>("Cancelado");
-            dummy.setInterval(date.atStartOfDay(), date.atStartOfDay().plusMinutes(1));
-            return dummy;
+        LocalTime clickTime = param.getZonedDateTime().toLocalTime();
+
+        if (clickTime.equals(LocalTime.MIDNIGHT)) {
+            clickTime = calendarView.getRequestedTime();
         }
+
+        Entry<Agenda> newEntry = showNewAgendaDialog(date, clickTime, null);
+        // Si no se creó la agenda (cancelado o solapamiento), no devolver nada
         return newEntry;
     });
 }
@@ -219,8 +221,17 @@ private void handleCalendarEntrySave(Entry<?> entry) {
 
         loadCalendar();
 
+    } catch (RuntimeException e) {
+        String msg = e.getMessage();
+        if (msg.contains("El horario")) {
+            alertError("Solapamiento de horario", msg);
+        } else {
+            alertError("Error guardando evento", msg);
+        }
+        loadCalendar();
     } catch (Exception e) {
         alertError("Error guardando evento", e);
+        loadCalendar();
     }
 }
 
@@ -234,7 +245,7 @@ private void handleCalendarEntryDelete(Entry<?> entry) {
     }
 }
 
-private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente) {
+private Entry<Agenda> showNewAgendaDialog(LocalDate date, LocalTime clickTime, Agenda agendaExistente) {
     try {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Nueva Agenda");
@@ -246,6 +257,7 @@ private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
+        // Combos de taller y colegio
         ComboBox<Taller> comboTaller = new ComboBox<>();
         comboTaller.getItems().addAll(talleres);
         if (agendaExistente != null) comboTaller.setValue(agendaExistente.getTaller());
@@ -268,6 +280,7 @@ private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente
         });
         if (agendaExistente != null) comboColegio.setValue(agendaExistente.getColegio());
 
+        // Combos de talleristas
         List<Usuario> talleristas = client.listUsuarios().stream()
                 .filter(u -> "ROLE_TALLERISTA".equalsIgnoreCase(u.getRol()))
                 .toList();
@@ -294,6 +307,8 @@ private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente
             });
         }
 
+        // Hora inicial
+        LocalTime startTime = clickTime != null ? clickTime : LocalTime.of(9, 0);
         if (agendaExistente != null) {
             List<Usuario> asignados = client.listTalleristasPorAgenda(agendaExistente.getId());
             if (asignados.size() > 0) comboTallerista1.setValue(asignados.get(0));
@@ -328,10 +343,12 @@ private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente
                 try {
                     Agenda agenda;
                     if (agendaExistente != null) {
+                        // Editar existente
                         agendaExistente.setTaller(tallerSel);
                         agendaExistente.setColegio(colegioSel);
                         agendaExistente.setFecha(date.toString());
-                        agendaExistente.setHora("09:00:00");
+                        agendaExistente.setHora(startTime.toString());
+
                         client.actualizarAgenda(agendaExistente.getId(), Map.of(
                                 "fecha", agendaExistente.getFecha(),
                                 "hora", agendaExistente.getHora(),
@@ -345,12 +362,14 @@ private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente
 
                         agenda = agendaExistente;
                     } else {
+                        // Crear nueva usando startTime
                         client.crearAgenda(Map.of(
                                 "fecha", date.toString(),
-                                "hora", "09:00:00",
+                                "hora", startTime.toString(),
                                 "taller", Map.of("id", tallerSel.getId()),
                                 "colegio", Map.of("id", colegioSel.getId())
                         ));
+
                         List<Agenda> agendas = client.listAgendas();
                         agenda = agendas.get(agendas.size() - 1);
 
@@ -370,13 +389,20 @@ private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente
                     }
 
                     newEntry[0] = new Entry<>(titulo);
-                    newEntry[0].setInterval(date.atTime(LocalTime.of(9, 0)), date.atTime(LocalTime.of(10, 0)));
+                    newEntry[0].setInterval(date.atTime(startTime), date.atTime(startTime.plusHours(1)));
                     newEntry[0].setUserObject(agenda);
 
                     loadCalendar();
 
+                } catch (RuntimeException e) {
+                    String msg = e.getMessage();
+                    if (msg.contains("El horario")) {
+                        alertError("Solapamiento de horario", msg);
+                    } else {
+                        alertError("Error guardando evento", msg);
+                    }
                 } catch (Exception e) {
-                    alertError("Error guardando agenda", e);
+                    alertError("Error guardando evento", e);
                 }
             }
         });
@@ -388,6 +414,7 @@ private Entry<Agenda> showNewAgendaDialog(LocalDate date, Agenda agendaExistente
         return null;
     }
 }
+
 
 private void alertError(String title, Object msg) {
     Alert alert = new Alert(Alert.AlertType.ERROR);
