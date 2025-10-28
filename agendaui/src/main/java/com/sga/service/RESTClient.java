@@ -1,5 +1,6 @@
 package com.sga.service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -10,6 +11,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sga.model.Agenda;
+import com.sga.model.Colegio;
 import com.sga.model.Taller;
 import com.sga.model.Usuario;
 
@@ -62,14 +64,20 @@ public class RESTClient {
     }
 
     // ---------------- COLEGIOS ----------------
-    public List<Map<String,Object>> listColegios() throws Exception {
+    public List<Colegio> listColegios() throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/colegios"))
                 .GET()).build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        return parseResponse(resp, new TypeReference<>() {}, "Error al listar colegios");
+
+        if (resp.statusCode() == 200) {
+            return mapper.readValue(resp.body(), new TypeReference<List<Colegio>>() {});
+        } else {
+            throw new RuntimeException("Error al listar colegios: " + resp.body());
+        }
     }
+
 
     public void crearColegio(Map<String,String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
@@ -230,7 +238,7 @@ public class RESTClient {
 
 
     public void crearAgenda(Map<String,Object> body) throws Exception {
-        String json = mapper.writeValueAsString(body); // Jackson serializa perfectamente un Map<String,Object>
+        String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/agendas"))
                 .header("Content-Type", "application/json")
@@ -243,7 +251,7 @@ public class RESTClient {
 
 
     public void actualizarAgenda(Long id, Map<String,Object> body) throws Exception {
-        String json = mapper.writeValueAsString(body); // Jackson serializa objetos anidados perfectamente
+        String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/agendas/" + id))
                 .header("Content-Type", "application/json")
@@ -263,6 +271,74 @@ public class RESTClient {
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
         if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+    }
+
+    // ---------------- ASIGNACIONES ----------------
+    public void asignarTallerista(Long agendaId, Long talleristaId) throws Exception {
+        // La URL pasa los IDs como parámetros de query
+        String url = BASE + "/asignaciones?agendaId=" + agendaId + "&talleristaId=" + talleristaId;
+
+        HttpRequest req = withAuth(HttpRequest.newBuilder()
+                .uri(URI.create(BASE + "/asignaciones?agendaId=" + agendaId + "&talleristaId=" + talleristaId))
+                .POST(HttpRequest.BodyPublishers.noBody()))
+                .build();
+
+        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+        if (resp.statusCode() >= 400) {
+            throw new RuntimeException("Error al asignar tallerista: " + resp.body());
+        }
+    }
+
+    public List<Map<String,Object>> listarAsignacionesPorAgenda(Long agendaId) throws Exception {
+        HttpRequest req = withAuth(HttpRequest.newBuilder()
+                .uri(URI.create(BASE + "/asignaciones/agenda/" + agendaId))
+                .GET()).build();
+
+        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+        return parseResponse(resp, new TypeReference<>() {}, "Error al listar asignaciones");
+    }
+
+    public List<Usuario> listTalleristasPorAgenda(Long agendaId) throws Exception {
+        String url = BASE + "/asignaciones/agenda/" + agendaId;
+
+        HttpRequest req = withAuth(HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET())
+                .build();
+
+        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+
+        if (resp.statusCode() == 200) {
+            return mapper.readValue(resp.body(), new TypeReference<List<Usuario>>() {});
+        } else {
+            throw new RuntimeException("Error al listar talleristas: " + resp.body());
+        }
+    }
+
+    public List<Map<String, Object>> obtenerTalleristasPorAgenda(Long agendaId) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(BASE + "/asignaciones/agenda/" + agendaId))
+            .header("Authorization", "Bearer " + token)
+            .GET()
+            .build();
+
+        HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200)
+            throw new RuntimeException("Error al obtener talleristas: " + response.body());
+
+        return new ObjectMapper().readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+    }
+
+    public void eliminarAsignacionesPorAgenda(Long agendaId) throws Exception {
+        HttpRequest req = withAuth(HttpRequest.newBuilder()
+                .uri(URI.create(BASE + "/asignaciones/agenda/" + agendaId))
+                .DELETE())
+                .build();
+
+        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+        if (resp.statusCode() >= 400) {
+            throw new RuntimeException("Error al eliminar asignaciones: " + resp.body());
+        }
     }
 
     // ---------------- REPORTES ----------------

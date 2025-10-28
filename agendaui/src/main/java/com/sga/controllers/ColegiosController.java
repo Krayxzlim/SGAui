@@ -79,16 +79,13 @@ public class ColegiosController {
         if (client == null) return;
         try {
             colegios.clear();
-            client.listColegios().forEach(map -> colegios.add(
-                new Colegio(
-                    String.valueOf(map.get("id")),
-                    (String) map.get("nombre"),
-                    (String) map.get("direccion"),
-                    map.get("contacto") != null ? (String) map.get("contacto") : ""
-                )
-            ));
-        } catch (Exception e) { e.printStackTrace(); }
+            colegios.addAll(client.listColegios());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
 
     private void createColegio() throws Exception {
         if (tfNombre.getText().isBlank()) throw new RuntimeException("El nombre es obligatorio");
