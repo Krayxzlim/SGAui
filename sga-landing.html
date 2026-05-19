@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SGA — Sistema de Gestión de Agenda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080e1a;
+  --surface: #0f1929;
+  --surface2: #151f30;
+  --border: rgba(255,255,255,.07);
+  --border2: rgba(255,255,255,.12);
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --accent3: #34d399;
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: .4;
+}
+
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 48px;
+  background: rgba(8,14,26,.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -.5px;
+}
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  color: var(--muted2);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-badge {
+  background: rgba(52,211,153,.1);
+  border: 1px solid rgba(52,211,153,.2);
+  color: var(--accent3);
+  font-size: 11px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.nav-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent3);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+}
+.hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+.hero-glow-1 {
+  width: 600px; height: 400px;
+  background: rgba(56,189,248,.08);
+  top: 10%; left: -10%;
+}
+.hero-glow-2 {
+  width: 500px; height: 300px;
+  background: rgba(129,140,248,.06);
+  bottom: 10%; right: -5%;
+}
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(56,189,248,.08);
+  border: 1px solid rgba(56,189,248,.2);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: 7px 18px;
+  border-radius: 999px;
+  margin-bottom: 28px;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 6vw, 76px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 24px;
+  max-width: 800px;
+}
+.hero-title .hi { color: var(--accent); }
+.hero-sub {
+  color: var(--muted2);
+  font-size: 17px;
+  line-height: 1.7;
+  max-width: 540px;
+  margin: 0 auto 40px;
+}
+.hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--accent);
+  color: #030d1a;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 13px 28px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity .2s;
+}
+.btn-primary:hover { opacity: .85; }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted2);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 13px 28px;
+  border-radius: 12px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color .2s, color .2s;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.25); color: var(--text); }
+
+.stack-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 48px;
+}
+.stack-pill {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+}
+
+.scroll-hint {
+  margin-top: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  animation: bounce 2s infinite;
+}
+.scroll-hint svg { opacity: .4; }
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+section { position: relative; z-index: 1; }
+.section-inner { max-width: 1100px; margin: 0 auto; padding: 100px 48px; }
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.section-body {
+  color: var(--muted2);
+  font-size: 15px;
+  line-height: 1.75;
+  max-width: 560px;
+}
+
+.divider-line {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+.arch-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2px;
+  background: var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 56px;
+}
+.arch-cell {
+  background: var(--surface);
+  padding: 32px 28px;
+  transition: background .2s;
+}
+.arch-cell:hover { background: var(--surface2); }
+.arch-cell-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 18px;
+}
+.arch-cell h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.arch-cell p { color: var(--muted2); font-size: 13px; line-height: 1.65; }
+.arch-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.arch-tag {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+
+.module-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  padding: 80px 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.module-block.reverse { direction: rtl; }
+.module-block.reverse > * { direction: ltr; }
+.module-number {
+  font-family: var(--font-display);
+  font-size: 80px;
+  font-weight: 800;
+  color: var(--border2);
+  line-height: 1;
+  margin-bottom: -8px;
+}
+.module-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+.module-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -.5px;
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+.module-desc { color: var(--muted2); font-size: 14px; line-height: 1.75; margin-bottom: 22px; }
+.module-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.module-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted2);
+}
+.module-features li::before {
+  content: '';
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.25);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.module-features li strong { color: var(--text); font-weight: 500; }
+
+.mock-win {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  overflow: hidden;
+  font-size: 12px;
+}
+.mock-bar {
+  background: #0a1120;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mock-bar-title { color: var(--muted); font-size: 11px; margin-left: 6px; }
+.mock-body { padding: 16px; }
+
+.mt { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.mt th { background: #0a1120; color: var(--muted); padding: 7px 10px; text-align: left; font-weight: 500; border-bottom: 1px solid var(--border); font-size: 11px; }
+.mt td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.03); color: #94a3b8; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mt tr:last-child td { border-bottom: none; }
+.mt tr:hover td { background: rgba(255,255,255,.02); }
+
+.frow { display: flex; align-items: center; gap: 8px; padding: 10px 0 2px; flex-wrap: wrap; }
+.fl { color: var(--muted); font-size: 10px; }
+.fi {
+  background: #0a1120;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 8px;
+  color: #e2e8f0;
+  font-size: 11px;
+  width: 90px;
+  outline: none;
+  font-family: var(--font-body);
+}
+.fs {
+  background: #0a1120;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 8px;
+  color: #e2e8f0;
+  font-size: 11px;
+  outline: none;
+  font-family: var(--font-body);
+}
+.fbtn {
+  padding: 5px 11px;
+  border-radius: 5px;
+  border: 1px solid var(--border2);
+  background: rgba(255,255,255,.04);
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: .15s;
+}
+.fbtn:hover { background: rgba(56,189,248,.1); border-color: rgba(56,189,248,.3); color: var(--accent); }
+.fbtn.p { background: rgba(56,189,248,.12); border-color: rgba(56,189,248,.3); color: var(--accent); }
+.fsep { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+.bdg { padding: 2px 8px; border-radius: 999px; font-size: 10px; }
+.ba { background: rgba(56,189,248,.12); color: #7dd3fc; }
+.bs { background: rgba(245,158,11,.1); color: #fbbf24; }
+.bt { background: rgba(52,211,153,.1); color: #6ee7b7; }
+
+.cal-g { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.cdn { text-align: center; font-size: 9px; color: var(--muted); padding: 3px; }
+.cd { text-align: center; font-size: 10px; padding: 4px 2px; border-radius: 4px; color: var(--muted); }
+.cd.ev { color: var(--accent); font-weight: 600; }
+.cd.td { background: #2563eb; color: white; border-radius: 50%; font-weight: 700; }
+.cd.em { opacity: 0; }
+.ev-i { display: flex; justify-content: space-between; padding: 7px 10px; background: rgba(255,255,255,.03); border-radius: 6px; margin-bottom: 5px; border-left: 2px solid var(--accent); }
+.ev-n { font-size: 10px; color: #cbd5e1; }
+.ev-t { font-size: 10px; color: var(--muted); }
+
+.sg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.sc { background: rgba(255,255,255,.03); border-radius: 8px; padding: 10px; border: 1px solid var(--border); }
+.sc label { font-size: 9px; color: var(--muted); display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .4px; }
+.sc .sv { font-size: 20px; font-weight: 700; color: var(--accent); }
+
+.bg-c { display: flex; align-items: flex-end; gap: 6px; height: 64px; }
+.bc { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+.bb { border-radius: 3px 3px 0 0; width: 100%; }
+.bl { font-size: 8px; color: var(--muted); }
+.bv { font-size: 8px; color: #475569; }
+
+.lc { max-width: 220px; margin: 0 auto; padding: 20px 0; }
+.ll { text-align: center; margin-bottom: 16px; }
+.ll .lg-t { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--accent); }
+.ll .lg-s { font-size: 10px; color: var(--muted); }
+.lf { margin-bottom: 8px; }
+.lf label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+.lf input { width: 100%; background: #0a1120; border: 1px solid var(--border2); border-radius: 6px; padding: 7px 10px; color: #e2e8f0; font-size: 11px; outline: none; font-family: var(--font-body); }
+.l-sub { width: 100%; padding: 8px; border-radius: 6px; background: #1d4ed8; border: none; color: white; font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font-body); margin-top: 2px; }
+.l-note { text-align: center; margin-top: 8px; font-size: 9px; color: #1e3a5f; }
+
+.overview-section { padding: 100px 48px; max-width: 1100px; margin: 0 auto; }
+.overview-win {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+.ov-bar {
+  background: #0a1120;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.ov-sidebar {
+  width: 180px;
+  background: #080e1a;
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ov-main { display: flex; min-height: 480px; }
+.ov-content { flex: 1; padding: 20px; overflow: hidden; }
+.side-logo {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent);
+  padding: 0 16px 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.side-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: .15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+}
+.side-item:hover { background: rgba(255,255,255,.03); color: var(--text); }
+.side-item.on { background: rgba(56,189,248,.08); color: var(--accent); border-right: 2px solid var(--accent); }
+.side-item .si-icon { font-size: 14px; opacity: .7; }
+.ov-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.ov-header h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+.ov-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.ov-stat { background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.ov-stat label { font-size: 10px; color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+.ov-stat .ov-val { font-size: 22px; font-weight: 700; }
+.ov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ov-card { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.ov-card h4 { font-size: 12px; color: var(--muted2); margin-bottom: 10px; font-weight: 500; }
+.ov-panel { display: none; }
+.ov-panel.on { display: block; }
+.ov-agenda-list { display: flex; flex-direction: column; gap: 6px; }
+.oa-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255,255,255,.03);
+  border-radius: 8px;
+  border-left: 2px solid var(--accent);
+  font-size: 11px;
+}
+
+.mejoras-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+.mejora-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color .2s, transform .2s;
+}
+.mejora-card:hover { border-color: rgba(56,189,248,.3); transform: translateY(-4px); }
+.mejora-card .m-icon { font-size: 22px; margin-bottom: 12px; display: block; }
+.mejora-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; font-family: var(--font-display); }
+.mejora-card p { font-size: 12px; color: var(--muted2); line-height: 1.55; }
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+.ft-logo { font-family: var(--font-display); font-weight: 800; color: var(--accent); font-size: 16px; }
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.fade-up.visible { opacity: 1; transform: none; }
+
+@media (max-width: 860px) {
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 24px 60px; }
+  .module-block { grid-template-columns: 1fr; gap: 32px; padding: 60px 24px; }
+  .module-block.reverse { direction: ltr; }
+  .arch-grid { grid-template-columns: 1fr; }
+  .section-inner { padding: 80px 24px; }
+  .overview-section { padding: 60px 24px; }
+  footer { flex-direction: column; gap: 8px; text-align: center; }
+  .ov-sidebar { display: none; }
+  .ov-stats { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">SGA</div>
+  <div class="nav-links">
+    <a href="#arquitectura">Arquitectura</a>
+    <a href="#modulos">Módulos</a>
+    <a href="#sistema">Sistema</a>
+    <a href="#mejoras">Mejoras</a>
+  </div>
+  <div class="nav-badge">Sistema activo</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-eyebrow">Sistema de Gestión de Agenda Escolar</div>
+  <h1 class="hero-title">
+    Plataforma integral para la gestión de <span class="hi">talleres educativos</span>
+  </h1>
+  <p class="hero-sub">
+    SGA centraliza la administración de talleres, colegios, usuarios y agendas en una arquitectura moderna desacoplada, construida con Spring Boot, JavaFX y MySQL.
+  </p>
+  <div class="hero-ctas">
+    <a href="#modulos" class="btn-primary">Explorar módulos</a>
+    <a href="#sistema" class="btn-ghost">Ver sistema completo</a>
+  </div>
+  <div class="stack-row">
+    <span class="stack-pill">Spring Boot</span>
+    <span class="stack-pill">JavaFX</span>
+    <span class="stack-pill">JWT</span>
+    <span class="stack-pill">Spring Security</span>
+    <span class="stack-pill">Hibernate / JPA</span>
+    <span class="stack-pill">MySQL</span>
+    <span class="stack-pill">REST API</span>
+    <span class="stack-pill">Maven</span>
+  </div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    Explorar
+  </div>
+</section>
+
+<hr class="divider-line">
+
+<section id="arquitectura">
+  <div class="section-inner fade-up">
+    <div class="section-label">Arquitectura técnica</div>
+    <h2 class="section-title">Tres capas, una sola plataforma</h2>
+    <p class="section-body">El proyecto adopta una arquitectura desacoplada donde el backend expone una API REST que el frontend consume de forma independiente, con MySQL como capa de persistencia relacional.</p>
+    <div class="arch-grid">
+      <div class="arch-cell">
+        <div class="arch-cell-icon" style="background: rgba(56,189,248,.1);">🖥️</div>
+        <h3>Frontend · JavaFX</h3>
+        <p>Aplicación de escritorio con interfaces modulares construidas en FXML y Scene Builder. Consume la API REST con autenticación JWT.</p>
+        <div class="arch-tags">
+          <span class="arch-tag">JavaFX</span>
+          <span class="arch-tag">FXML</span>
+          <span class="arch-tag">Scene Builder</span>
+          <span class="arch-tag">CalendarFX</span>
+        </div>
+      </div>
+      <div class="arch-cell">
+        <div class="arch-cell-icon" style="background: rgba(129,140,248,.1);">⚙️</div>
+        <h3>Backend · Spring Boot</h3>
+        <p>API REST por capas con seguridad basada en tokens JWT, control de roles y persistencia mediante JPA/Hibernate.</p>
+        <div class="arch-tags">
+          <span class="arch-tag">Spring Boot</span>
+          <span class="arch-tag">Spring Security</span>
+          <span class="arch-tag">JWT</span>
+          <span class="arch-tag">Hibernate</span>
+          <span class="arch-tag">Maven</span>
+        </div>
+      </div>
+      <div class="arch-cell">
+        <div class="arch-cell-icon" style="background: rgba(52,211,153,.1);">🗄️</div>
+        <h3>Datos · MySQL</h3>
+        <p>Persistencia relacional con entidades JPA: Usuarios, Talleres, Colegios, Agendas y Asignaciones con sus relaciones definidas.</p>
+        <div class="arch-tags">
+          <span class="arch-tag">MySQL</span>
+          <span class="arch-tag">JPA</span>
+          <span class="arch-tag">Entidades relacionales</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider-line">
+
+<section id="modulos">
+
+  <div class="module-block fade-up">
+    <div class="module-info">
+      <div class="module-number">01</div>
+      <div class="module-tag" style="background:rgba(56,189,248,.1);color:#7dd3fc;border:1px solid rgba(56,189,248,.2);">Seguridad</div>
+      <h3 class="module-title">Autenticación y control de acceso</h3>
+      <p class="module-desc">El acceso al sistema está protegido mediante JWT integrado con Spring Security. Cada usuario se autentica con su email y contraseña, y recibe un token con su rol que habilita únicamente las funciones que le corresponden.</p>
+      <ul class="module-features">
+        <li><div><strong>JWT stateless</strong> — tokens con expiración configurable sin estado en servidor</div></li>
+        <li><div><strong>Spring Security</strong> — protección de endpoints según rol en el backend</div></li>
+        <li><div><strong>Tres roles</strong> — ADMINISTRADOR, SUPERVISOR y TALLERISTA con permisos diferenciados</div></li>
+      </ul>
+    </div>
+    <div class="mock-win">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span class="mock-bar-title">SGA — Iniciar sesión</span>
+      </div>
+      <div class="lc">
+        <div class="ll"><div class="lg-t">SGA</div><div class="lg-s">Sistema de Gestión de Agenda</div></div>
+        <div class="lf"><label>Email</label><input type="text" placeholder="usuario@sga.edu.ar"/></div>
+        <div class="lf"><label>Contraseña</label><input type="password" placeholder="••••••••"/></div>
+        <button class="l-sub">Ingresar al sistema</button>
+        <div class="l-note">Autenticación segura · JWT + Spring Security</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider-line">
+
+  <div class="module-block reverse fade-up">
+    <div class="module-info">
+      <div class="module-number">02</div>
+      <div class="module-tag" style="background:rgba(52,211,153,.1);color:#6ee7b7;border:1px solid rgba(52,211,153,.2);">Colegios</div>
+      <h3 class="module-title">Gestión de instituciones educativas</h3>
+      <p class="module-desc">Permite registrar y mantener actualizada la información de los colegios donde se dictan los talleres. Cada institución puede asociarse a múltiples talleres y eventos del calendario.</p>
+      <ul class="module-features">
+        <li><div><strong>CRUD completo</strong> — alta, modificación, eliminación y consulta</div></li>
+        <li><div><strong>Datos institucionales</strong> — nombre, dirección y contacto centralizado</div></li>
+        <li><div><strong>Relación con talleres</strong> — cada colegio vincula sus actividades y agendas</div></li>
+      </ul>
+    </div>
+    <div class="mock-win">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span class="mock-bar-title">Gestión de Colegios</span>
+      </div>
+      <div class="mock-body" style="padding:0;">
+        <table class="mt">
+          <thead><tr><th style="width:28px">ID</th><th>Nombre</th><th>Dirección</th><th style="width:100px">Contacto</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#334155">1</td><td>Escuela N° 14 Gral. San Martín</td><td>Av. Rivadavia 1200</td><td>011-4821-3456</td></tr>
+            <tr><td style="color:#334155">2</td><td>Instituto Belgrano</td><td>Cabildo 540</td><td>011-4777-8900</td></tr>
+            <tr><td style="color:#334155">3</td><td>Colegio Nacional del Sur</td><td>Mitre 88, Bahía Blanca</td><td>0291-452-1100</td></tr>
+            <tr><td style="color:#334155">4</td><td>Centro Educativo Palermo</td><td>Thames 1430</td><td>011-4832-0011</td></tr>
+            <tr><td style="color:#334155">5</td><td>Escuela Técnica N° 2</td><td>Larrea 230</td><td>011-4961-7788</td></tr>
+          </tbody>
+        </table>
+        <div style="padding:0 14px;">
+          <hr class="fsep">
+          <div class="frow"><span class="fl">Nombre:</span><input class="fi" placeholder="Nombre"/><span class="fl">Dirección:</span><input class="fi" placeholder="Dirección" style="width:110px"/><span class="fl">Contacto:</span><input class="fi" placeholder="Tel."/></div>
+          <div class="frow"><button class="fbtn p">Crear</button><button class="fbtn">Actualizar</button><button class="fbtn">Eliminar</button><button class="fbtn">Refrescar</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider-line">
+
+  <div class="module-block fade-up">
+    <div class="module-info">
+      <div class="module-number">03</div>
+      <div class="module-tag" style="background:rgba(129,140,248,.1);color:#a5b4fc;border:1px solid rgba(129,140,248,.2);">Talleres</div>
+      <h3 class="module-title">Administración de contenido educativo</h3>
+      <p class="module-desc">Módulo central del sistema. Gestiona los talleres educativos con su nombre, descripción, talleristas asignados y su relación con colegios y agendas. Es el eje que conecta los demás módulos.</p>
+      <ul class="module-features">
+        <li><div><strong>Registro completo</strong> — nombre, descripción y talleristas asignados</div></li>
+        <li><div><strong>Integración con agenda</strong> — los talleres se vinculan directamente a eventos del calendario</div></li>
+        <li><div><strong>Asignación de talleristas</strong> — relación entre usuarios TALLERISTA y sus actividades</div></li>
+      </ul>
+    </div>
+    <div class="mock-win">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span class="mock-bar-title">Gestión de Talleres</span>
+      </div>
+      <div class="mock-body" style="padding:0;">
+        <table class="mt">
+          <thead><tr><th style="width:28px">ID</th><th>Nombre</th><th>Descripción</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#334155">1</td><td>Ciberseguridad</td><td>Fundamentos de seguridad informática</td></tr>
+            <tr><td style="color:#334155">2</td><td>Programación Inicial</td><td>Lógica y algoritmos con Scratch</td></tr>
+            <tr><td style="color:#334155">3</td><td>Uso Responsable de Internet</td><td>Privacidad, redes y huella digital</td></tr>
+            <tr><td style="color:#334155">4</td><td>Robótica Educativa</td><td>Robots básicos y programación</td></tr>
+            <tr><td style="color:#334155">5</td><td>Inteligencia Artificial</td><td>Conceptos de IA y ética tecnológica</td></tr>
+            <tr><td style="color:#334155">6</td><td>Diseño Digital</td><td>Comunicación visual y edición</td></tr>
+          </tbody>
+        </table>
+        <div style="padding:0 14px;">
+          <hr class="fsep">
+          <div class="frow"><span class="fl">Nombre:</span><input class="fi" placeholder="Nombre del taller" style="width:130px"/><span class="fl">Descripción:</span><input class="fi" placeholder="Descripción" style="width:150px"/></div>
+          <div class="frow"><button class="fbtn p">Crear</button><button class="fbtn">Actualizar</button><button class="fbtn">Eliminar</button><button class="fbtn">Refrescar</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider-line">
+
+  <div class="module-block reverse fade-up">
+    <div class="module-info">
+      <div class="module-number">04</div>
+      <div class="module-tag" style="background:rgba(251,191,36,.08);color:#fcd34d;border:1px solid rgba(251,191,36,.2);">Usuarios</div>
+      <h3 class="module-title">Gestión de acceso y perfiles</h3>
+      <p class="module-desc">Permite administrar el ciclo completo de usuarios del sistema. El acceso a este módulo está restringido al administrador, quien puede crear, modificar y eliminar usuarios asignándoles el rol correspondiente.</p>
+      <ul class="module-features">
+        <li><div><strong>CRUD de usuarios</strong> — alta, modificación y baja con validación de datos</div></li>
+        <li><div><strong>Roles diferenciados</strong> — ADMINISTRADOR con acceso total, SUPERVISOR y TALLERISTA con permisos acotados</div></li>
+        <li><div><strong>Seguridad por JWT</strong> — el token identifica el rol y habilita los endpoints correspondientes</div></li>
+      </ul>
+    </div>
+    <div class="mock-win">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span class="mock-bar-title">Gestión de Usuarios</span>
+      </div>
+      <div class="mock-body" style="padding:0;">
+        <table class="mt">
+          <thead><tr><th style="width:28px">ID</th><th>Nombre</th><th>Email</th><th style="width:85px">Rol</th></tr></thead>
+          <tbody>
+            <tr><td style="color:#334155">1</td><td>Luciano Aufieri</td><td>l.aufieri@sga.edu.ar</td><td><span class="bdg ba">ADMIN</span></td></tr>
+            <tr><td style="color:#334155">2</td><td>Marina Gómez</td><td>m.gomez@sga.edu.ar</td><td><span class="bdg bs">SUPERV.</span></td></tr>
+            <tr><td style="color:#334155">3</td><td>Carlos Díaz</td><td>c.diaz@sga.edu.ar</td><td><span class="bdg bt">TALL.</span></td></tr>
+            <tr><td style="color:#334155">4</td><td>Valentina López</td><td>v.lopez@sga.edu.ar</td><td><span class="bdg bt">TALL.</span></td></tr>
+            <tr><td style="color:#334155">5</td><td>Rodrigo Paz</td><td>r.paz@sga.edu.ar</td><td><span class="bdg bs">SUPERV.</span></td></tr>
+          </tbody>
+        </table>
+        <div style="padding:0 14px;">
+          <hr class="fsep">
+          <div class="frow"><span class="fl">Nombre:</span><input class="fi" placeholder="Nombre"/><span class="fl">Email:</span><input class="fi" placeholder="email@sga.edu.ar" style="width:120px"/><span class="fl">Rol:</span><select class="fs"><option>ADMINISTRADOR</option><option>SUPERVISOR</option><option selected>TALLERISTA</option></select></div>
+          <div class="frow"><button class="fbtn p">Crear</button><button class="fbtn">Actualizar</button><button class="fbtn">Eliminar</button><button class="fbtn">Refrescar</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider-line">
+
+  <div class="module-block fade-up">
+    <div class="module-info">
+      <div class="module-number">05</div>
+      <div class="module-tag" style="background:rgba(56,189,248,.1);color:#7dd3fc;border:1px solid rgba(56,189,248,.2);">Agenda</div>
+      <h3 class="module-title">Planificación visual de actividades</h3>
+      <p class="module-desc">El módulo más importante del sistema. Permite visualizar y gestionar las actividades en un calendario interactivo con vistas diarias y mensuales, facilitando la planificación operativa y el seguimiento de talleres programados en cada institución.</p>
+      <ul class="module-features">
+        <li><div><strong>CalendarFX</strong> — calendario diario y mensual con eventos dinámicos</div></li>
+        <li><div><strong>Gestión de horarios</strong> — registro de eventos con hora, colegio y taller vinculado</div></li>
+        <li><div><strong>Reprogramación</strong> — permite modificar y reagendar actividades existentes</div></li>
+        <li><div><strong>Distribución temporal</strong> — visibilidad completa de la operación en el tiempo</div></li>
+      </ul>
+    </div>
+    <div class="mock-win">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span class="mock-bar-title">Agenda y Calendario · Mayo 2026</span>
+      </div>
+      <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <div style="font-size:9px;color:#334155;margin-bottom:7px;letter-spacing:.5px;text-transform:uppercase;">Mayo 2026</div>
+          <div class="cal-g">
+            <div class="cdn">Lu</div><div class="cdn">Ma</div><div class="cdn">Mi</div><div class="cdn">Ju</div><div class="cdn">Vi</div><div class="cdn">Sa</div><div class="cdn">Do</div>
+            <div class="cd em"></div><div class="cd em"></div><div class="cd em"></div><div class="cd ev">1</div><div class="cd">2</div><div class="cd">3</div><div class="cd">4</div>
+            <div class="cd">5</div><div class="cd ev">6</div><div class="cd">7</div><div class="cd">8</div><div class="cd ev">9</div><div class="cd">10</div><div class="cd">11</div>
+            <div class="cd">12</div><div class="cd">13</div><div class="cd ev">14</div><div class="cd">15</div><div class="cd">16</div><div class="cd">17</div><div class="cd">18</div>
+            <div class="cd td">19</div><div class="cd">20</div><div class="cd ev">21</div><div class="cd">22</div><div class="cd">23</div><div class="cd">24</div><div class="cd">25</div>
+            <div class="cd">26</div><div class="cd ev">27</div><div class="cd">28</div><div class="cd">29</div><div class="cd">30</div><div class="cd">31</div><div class="cd em"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:#334155;margin-bottom:7px;letter-spacing:.5px;text-transform:uppercase;">Hoy · 19 de mayo</div>
+          <div class="ev-i"><span class="ev-n">Ciberseguridad — Esc. N°14</span><span class="ev-t">09:00</span></div>
+          <div class="ev-i" style="border-left-color:#a78bfa;"><span class="ev-n">Programación — Belgrano</span><span class="ev-t">11:00</span></div>
+          <div class="ev-i" style="border-left-color:#34d399;"><span class="ev-n">Internet — C.E. Palermo</span><span class="ev-t">14:00</span></div>
+          <div class="ev-i" style="border-left-color:#fbbf24;"><span class="ev-n">Robótica — E.T. N°2</span><span class="ev-t">16:30</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider-line">
+
+  <div class="module-block reverse fade-up">
+    <div class="module-info">
+      <div class="module-number">06</div>
+      <div class="module-tag" style="background:rgba(52,211,153,.1);color:#6ee7b7;border:1px solid rgba(52,211,153,.2);">Reportes</div>
+      <h3 class="module-title">Trazabilidad y métricas del sistema</h3>
+      <p class="module-desc">Provee visibilidad sobre el desempeño operativo: talleres dictados, colegios alcanzados, alumnos impactados y horas ejecutadas. Los datos son actualizables en tiempo real y exportables a Excel para análisis externo.</p>
+      <ul class="module-features">
+        <li><div><strong>Dashboard de métricas</strong> — indicadores clave con actualización en tiempo real</div></li>
+        <li><div><strong>Exportación a Excel</strong> — generación de reportes descargables para análisis externo</div></li>
+        <li><div><strong>Trazabilidad</strong> — control histórico de actividades por taller, colegio y período</div></li>
+      </ul>
+    </div>
+    <div class="mock-win">
+      <div class="mock-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span class="mock-bar-title">Reportes y estadísticas</span>
+      </div>
+      <div style="padding:14px;">
+        <div class="sg">
+          <div class="sc"><label>Talleres activos</label><div class="sv">24</div></div>
+          <div class="sc"><label>Colegios</label><div class="sv" style="color:#34d399;">18</div></div>
+          <div class="sc"><label>Alumnos</label><div class="sv" style="color:#a78bfa;">1.240</div></div>
+          <div class="sc"><label>Horas dictadas</label><div class="sv" style="color:#fbbf24;">312</div></div>
+        </div>
+        <div style="font-size:9px;color:#334155;margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;">Sesiones por taller</div>
+        <div class="bg-c">
+          <div class="bc"><div class="bv">34</div><div class="bb" style="height:100%;background:#3b82f6;"></div><div class="bl">Ciber.</div></div>
+          <div class="bc"><div class="bv">28</div><div class="bb" style="height:82%;background:#06b6d4;"></div><div class="bl">Prog.</div></div>
+          <div class="bc"><div class="bv">22</div><div class="bb" style="height:65%;background:#8b5cf6;"></div><div class="bl">Internet</div></div>
+          <div class="bc"><div class="bv">19</div><div class="bb" style="height:56%;background:#10b981;"></div><div class="bl">Robot.</div></div>
+          <div class="bc"><div class="bv">15</div><div class="bb" style="height:44%;background:#f59e0b;"></div><div class="bl">IA</div></div>
+          <div class="bc"><div class="bv">11</div><div class="bb" style="height:32%;background:#ec4899;"></div><div class="bl">Diseño</div></div>
+        </div>
+        <hr class="fsep">
+        <div class="frow"><button class="fbtn">Refrescar</button><button class="fbtn p">Exportar Excel</button></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<hr class="divider-line">
+
+<section id="sistema">
+  <div class="overview-section fade-up">
+    <div class="section-label">Vista del sistema</div>
+    <h2 class="section-title">El sistema integrado en una sola pantalla</h2>
+    <p class="section-body">Así se ve SGA en funcionamiento: una ventana principal con navegación lateral que centraliza todos los módulos, métricas en tiempo real y la agenda del día.</p>
+    <div class="overview-win">
+      <div class="ov-bar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span style="color:#334155;font-size:11px;margin-left:8px;font-family:var(--font-body);">SGA — Sistema de Gestión de Agenda</span>
+        <div style="margin-left:auto;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:#34d399;font-size:10px;padding:3px 10px;border-radius:999px;font-family:var(--font-body);">● Conectado</div>
+      </div>
+      <div class="ov-main">
+        <div class="ov-sidebar">
+          <div class="side-logo">SGA</div>
+          <button class="side-item on" onclick="ovSwitch('dash',this)"><span class="si-icon">▦</span> Dashboard</button>
+          <button class="side-item" onclick="ovSwitch('colegios',this)"><span class="si-icon">🏫</span> Colegios</button>
+          <button class="side-item" onclick="ovSwitch('talleres',this)"><span class="si-icon">📚</span> Talleres</button>
+          <button class="side-item" onclick="ovSwitch('usuarios',this)"><span class="si-icon">👥</span> Usuarios</button>
+          <button class="side-item" onclick="ovSwitch('agenda',this)"><span class="si-icon">📅</span> Agenda</button>
+          <button class="side-item" onclick="ovSwitch('reportes',this)"><span class="si-icon">📊</span> Reportes</button>
+        </div>
+        <div class="ov-content">
+          <div class="ov-panel on" id="ov-dash">
+            <div class="ov-header">
+              <h2>Dashboard</h2>
+              <div style="font-size:11px;color:#334155;">Lunes 19 de mayo, 2026</div>
+            </div>
+            <div class="ov-stats">
+              <div class="ov-stat"><label>Talleres activos</label><div class="ov-val" style="color:#38bdf8;">24</div></div>
+              <div class="ov-stat"><label>Colegios</label><div class="ov-val" style="color:#34d399;">18</div></div>
+              <div class="ov-stat"><label>Usuarios</label><div class="ov-val" style="color:#a78bfa;">52</div></div>
+              <div class="ov-stat"><label>Eventos hoy</label><div class="ov-val" style="color:#fbbf24;">4</div></div>
+            </div>
+            <div class="ov-grid">
+              <div class="ov-card">
+                <h4>Agenda de hoy</h4>
+                <div class="ov-agenda-list">
+                  <div class="oa-item"><span style="font-size:11px;">Ciberseguridad — Esc. N°14</span><span style="font-size:10px;color:#334155;">09:00</span></div>
+                  <div class="oa-item" style="border-left-color:#a78bfa;"><span style="font-size:11px;">Programación — Belgrano</span><span style="font-size:10px;color:#334155;">11:00</span></div>
+                  <div class="oa-item" style="border-left-color:#34d399;"><span style="font-size:11px;">Internet — C.E. Palermo</span><span style="font-size:10px;color:#334155;">14:00</span></div>
+                  <div class="oa-item" style="border-left-color:#fbbf24;"><span style="font-size:11px;">Robótica — E.T. N°2</span><span style="font-size:10px;color:#334155;">16:30</span></div>
+                </div>
+              </div>
+              <div class="ov-card">
+                <h4>Actividad por taller</h4>
+                <div class="bg-c" style="height:80px;">
+                  <div class="bc"><div class="bv">34</div><div class="bb" style="height:100%;background:#3b82f6;"></div><div class="bl">Ciber.</div></div>
+                  <div class="bc"><div class="bv">28</div><div class="bb" style="height:82%;background:#06b6d4;"></div><div class="bl">Prog.</div></div>
+                  <div class="bc"><div class="bv">22</div><div class="bb" style="height:65%;background:#8b5cf6;"></div><div class="bl">Internet</div></div>
+                  <div class="bc"><div class="bv">19</div><div class="bb" style="height:56%;background:#10b981;"></div><div class="bl">Robot.</div></div>
+                  <div class="bc"><div class="bv">15</div><div class="bb" style="height:44%;background:#f59e0b;"></div><div class="bl">IA</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ov-panel" id="ov-colegios">
+            <div class="ov-header"><h2>Colegios</h2></div>
+            <table class="mt" style="font-size:12px;">
+              <thead><tr><th style="width:32px">ID</th><th>Nombre</th><th>Dirección</th><th style="width:110px">Contacto</th></tr></thead>
+              <tbody>
+                <tr><td style="color:#334155">1</td><td>Escuela N° 14 Gral. San Martín</td><td>Av. Rivadavia 1200</td><td>011-4821-3456</td></tr>
+                <tr><td style="color:#334155">2</td><td>Instituto Belgrano</td><td>Cabildo 540</td><td>011-4777-8900</td></tr>
+                <tr><td style="color:#334155">3</td><td>Colegio Nacional del Sur</td><td>Mitre 88, Bahía Blanca</td><td>0291-452-1100</td></tr>
+                <tr><td style="color:#334155">4</td><td>Centro Educativo Palermo</td><td>Thames 1430</td><td>011-4832-0011</td></tr>
+                <tr><td style="color:#334155">5</td><td>Escuela Técnica N° 2</td><td>Larrea 230</td><td>011-4961-7788</td></tr>
+              </tbody>
+            </table>
+            <hr class="fsep" style="margin-top:12px;">
+            <div class="frow"><span class="fl">Nombre:</span><input class="fi" placeholder="Nombre"/><span class="fl">Dirección:</span><input class="fi" placeholder="Dirección" style="width:120px"/><span class="fl">Contacto:</span><input class="fi" placeholder="Tel."/></div>
+            <div class="frow"><button class="fbtn p">Crear</button><button class="fbtn">Actualizar</button><button class="fbtn">Eliminar</button><button class="fbtn">Refrescar</button></div>
+          </div>
+
+          <div class="ov-panel" id="ov-talleres">
+            <div class="ov-header"><h2>Talleres</h2></div>
+            <table class="mt" style="font-size:12px;">
+              <thead><tr><th style="width:32px">ID</th><th>Nombre</th><th>Descripción</th></tr></thead>
+              <tbody>
+                <tr><td style="color:#334155">1</td><td>Ciberseguridad</td><td>Fundamentos de seguridad informática para jóvenes</td></tr>
+                <tr><td style="color:#334155">2</td><td>Programación Inicial</td><td>Lógica y algoritmos con Scratch</td></tr>
+                <tr><td style="color:#334155">3</td><td>Uso Responsable de Internet</td><td>Privacidad, redes y huella digital</td></tr>
+                <tr><td style="color:#334155">4</td><td>Robótica Educativa</td><td>Robots básicos y programación</td></tr>
+                <tr><td style="color:#334155">5</td><td>Inteligencia Artificial</td><td>Conceptos de IA y ética tecnológica</td></tr>
+              </tbody>
+            </table>
+            <hr class="fsep" style="margin-top:12px;">
+            <div class="frow"><span class="fl">Nombre:</span><input class="fi" placeholder="Nombre del taller" style="width:130px"/><span class="fl">Descripción:</span><input class="fi" placeholder="Descripción" style="width:160px"/></div>
+            <div class="frow"><button class="fbtn p">Crear</button><button class="fbtn">Actualizar</button><button class="fbtn">Eliminar</button><button class="fbtn">Refrescar</button></div>
+          </div>
+
+          <div class="ov-panel" id="ov-usuarios">
+            <div class="ov-header"><h2>Usuarios</h2></div>
+            <table class="mt" style="font-size:12px;">
+              <thead><tr><th style="width:32px">ID</th><th>Nombre</th><th>Email</th><th style="width:90px">Rol</th></tr></thead>
+              <tbody>
+                <tr><td style="color:#334155">1</td><td>Luciano Aufieri</td><td>l.aufieri@sga.edu.ar</td><td><span class="bdg ba">ADMIN</span></td></tr>
+                <tr><td style="color:#334155">2</td><td>Marina Gómez</td><td>m.gomez@sga.edu.ar</td><td><span class="bdg bs">SUPERV.</span></td></tr>
+                <tr><td style="color:#334155">3</td><td>Carlos Díaz</td><td>c.diaz@sga.edu.ar</td><td><span class="bdg bt">TALL.</span></td></tr>
+                <tr><td style="color:#334155">4</td><td>Valentina López</td><td>v.lopez@sga.edu.ar</td><td><span class="bdg bt">TALL.</span></td></tr>
+              </tbody>
+            </table>
+            <hr class="fsep" style="margin-top:12px;">
+            <div class="frow"><span class="fl">Nombre:</span><input class="fi" placeholder="Nombre"/><span class="fl">Email:</span><input class="fi" placeholder="email@sga.edu.ar" style="width:130px"/><span class="fl">Rol:</span><select class="fs"><option>ADMINISTRADOR</option><option>SUPERVISOR</option><option selected>TALLERISTA</option></select></div>
+            <div class="frow"><button class="fbtn p">Crear</button><button class="fbtn">Actualizar</button><button class="fbtn">Eliminar</button><button class="fbtn">Refrescar</button></div>
+          </div>
+
+          <div class="ov-panel" id="ov-agenda">
+            <div class="ov-header"><h2>Agenda · Mayo 2026</h2></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div>
+                <div style="font-size:9px;color:#334155;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">Mes actual</div>
+                <div class="cal-g">
+                  <div class="cdn">Lu</div><div class="cdn">Ma</div><div class="cdn">Mi</div><div class="cdn">Ju</div><div class="cdn">Vi</div><div class="cdn">Sa</div><div class="cdn">Do</div>
+                  <div class="cd em"></div><div class="cd em"></div><div class="cd em"></div><div class="cd ev">1</div><div class="cd">2</div><div class="cd">3</div><div class="cd">4</div>
+                  <div class="cd">5</div><div class="cd ev">6</div><div class="cd">7</div><div class="cd">8</div><div class="cd ev">9</div><div class="cd">10</div><div class="cd">11</div>
+                  <div class="cd">12</div><div class="cd">13</div><div class="cd ev">14</div><div class="cd">15</div><div class="cd">16</div><div class="cd">17</div><div class="cd">18</div>
+                  <div class="cd td">19</div><div class="cd">20</div><div class="cd ev">21</div><div class="cd">22</div><div class="cd">23</div><div class="cd">24</div><div class="cd">25</div>
+                  <div class="cd">26</div><div class="cd ev">27</div><div class="cd">28</div><div class="cd">29</div><div class="cd">30</div><div class="cd">31</div><div class="cd em"></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:9px;color:#334155;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">Eventos del día</div>
+                <div class="ev-i"><span class="ev-n">Ciberseguridad — Esc. N°14</span><span class="ev-t">09:00 hs</span></div>
+                <div class="ev-i" style="border-left-color:#a78bfa;"><span class="ev-n">Programación — Belgrano</span><span class="ev-t">11:00 hs</span></div>
+                <div class="ev-i" style="border-left-color:#34d399;"><span class="ev-n">Internet — C.E. Palermo</span><span class="ev-t">14:00 hs</span></div>
+                <div class="ev-i" style="border-left-color:#fbbf24;"><span class="ev-n">Robótica — E.T. N°2</span><span class="ev-t">16:30 hs</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ov-panel" id="ov-reportes">
+            <div class="ov-header"><h2>Reportes</h2></div>
+            <div class="sg">
+              <div class="sc"><label>Talleres activos</label><div class="sv">24</div></div>
+              <div class="sc"><label>Colegios alcanzados</label><div class="sv" style="color:#34d399;">18</div></div>
+              <div class="sc"><label>Alumnos impactados</label><div class="sv" style="color:#a78bfa;">1.240</div></div>
+              <div class="sc"><label>Horas dictadas</label><div class="sv" style="color:#fbbf24;">312</div></div>
+            </div>
+            <div style="font-size:9px;color:#334155;margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase;">Sesiones por taller</div>
+            <div class="bg-c">
+              <div class="bc"><div class="bv">34</div><div class="bb" style="height:100%;background:#3b82f6;"></div><div class="bl">Ciber.</div></div>
+              <div class="bc"><div class="bv">28</div><div class="bb" style="height:82%;background:#06b6d4;"></div><div class="bl">Prog.</div></div>
+              <div class="bc"><div class="bv">22</div><div class="bb" style="height:65%;background:#8b5cf6;"></div><div class="bl">Internet</div></div>
+              <div class="bc"><div class="bv">19</div><div class="bb" style="height:56%;background:#10b981;"></div><div class="bl">Robot.</div></div>
+              <div class="bc"><div class="bv">15</div><div class="bb" style="height:44%;background:#f59e0b;"></div><div class="bl">IA</div></div>
+              <div class="bc"><div class="bv">11</div><div class="bb" style="height:32%;background:#ec4899;"></div><div class="bl">Diseño</div></div>
+            </div>
+            <hr class="fsep">
+            <div class="frow"><button class="fbtn">Refrescar</button><button class="fbtn p">Exportar Excel</button></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider-line">
+
+<section id="mejoras">
+  <div class="section-inner fade-up">
+    <div class="section-label">Roadmap</div>
+    <h2 class="section-title">Mejoras futuras planificadas</h2>
+    <p class="section-body">El sistema está concebido como una base escalable. Estas son las funcionalidades identificadas para próximas iteraciones.</p>
+    <div class="mejoras-grid">
+      <div class="mejora-card"><span class="m-icon">🔔</span><h4>Notificaciones</h4><p>Alertas automáticas sobre talleres próximos, cambios de agenda o vencimientos.</p></div>
+      <div class="mejora-card"><span class="m-icon">📈</span><h4>Dashboard estadístico</h4><p>Métricas avanzadas con gráficos de evolución histórica y comparativas por período.</p></div>
+      <div class="mejora-card"><span class="m-icon">🌐</span><h4>Versión web responsive</h4><p>Interfaz accesible desde el navegador, complementaria al cliente JavaFX de escritorio.</p></div>
+      <div class="mejora-card"><span class="m-icon">🔍</span><h4>Auditoría de acciones</h4><p>Registro de todas las operaciones realizadas por cada usuario para trazabilidad completa.</p></div>
+      <div class="mejora-card"><span class="m-icon">📄</span><h4>Gestión documental</h4><p>Adjuntar y organizar documentos asociados a talleres, colegios y usuarios.</p></div>
+      <div class="mejora-card"><span class="m-icon">🔗</span><h4>Servicios externos</h4><p>Integración con calendarios externos, sistemas de email y plataformas educativas.</p></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider-line">
+
+<footer>
+  <div class="ft-logo">SGA</div>
+  <div>Sistema de Gestión de Agenda · Talleres Escolares</div>
+  <div>Desarrollado por Luciano Aufieri</div>
+</footer>
+
+<script>
+function ovSwitch(id, btn) {
+  document.querySelectorAll('.ov-panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.side-item').forEach(b => b.classList.remove('on'));
+  document.getElementById('ov-' + id).classList.add('on');
+  btn.classList.add('on');
+}
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
