@@ -2,7 +2,7 @@
 
 Plataforma integral para la administración de talleres educativos, colegios, usuarios y agendas escolares. Desarrollada con una arquitectura desacoplada: backend REST en Spring Boot y cliente de escritorio en JavaFX.
 
-> 🌐 **[Ver presentación del proyecto]([https://rawcdn.githack.com/Krayxzlim/SGA/main/sga-landing.html](https://rawcdn.githack.com/Krayxzlim/SGAui/9dd1e342a45e9806882c9a7df809fb42597cf90c/sga-landing.html))**
+> 🌐 **[Ver presentación del proyecto](https://rawcdn.githack.com/Krayxzlim/SGAui/9dd1e342a45e9806882c9a7df809fb42597cf90c/sga-landing.html)**
 
 ---
 
