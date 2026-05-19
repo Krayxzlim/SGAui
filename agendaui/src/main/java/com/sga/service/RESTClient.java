@@ -16,17 +16,18 @@ import com.sga.model.Taller;
 import com.sga.model.Usuario;
 
 public class RESTClient {
-    private static final String BASE = "http://localhost:8080/api";
+    private static final String BASE = "http://localhost:8081/api";
     private final HttpClient http = HttpClient.newHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
     private String token;
 
-    public void setToken(String t) { this.token = t; }
+    public void setToken(String t) {
+        this.token = t;
+    }
 
     public String getToken() {
         return token;
     }
-
 
     // ---------------- LOGIN ----------------
     public String login(String email, String password) throws Exception {
@@ -51,7 +52,8 @@ public class RESTClient {
     }
 
     private HttpRequest.Builder withAuth(HttpRequest.Builder builder) {
-        if (token != null) builder.header("Authorization", "Bearer " + token);
+        if (token != null)
+            builder.header("Authorization", "Bearer " + token);
         return builder;
     }
 
@@ -72,14 +74,14 @@ public class RESTClient {
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
 
         if (resp.statusCode() == 200) {
-            return mapper.readValue(resp.body(), new TypeReference<List<Colegio>>() {});
+            return mapper.readValue(resp.body(), new TypeReference<List<Colegio>>() {
+            });
         } else {
             throw new RuntimeException("Error al listar colegios: " + resp.body());
         }
     }
 
-
-    public void crearColegio(Map<String,String> body) throws Exception {
+    public void crearColegio(Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/colegios"))
@@ -88,10 +90,11 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
-    public void actualizarColegio(Long id, Map<String,String> body) throws Exception {
+    public void actualizarColegio(Long id, Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/colegios/" + id))
@@ -100,7 +103,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     public void eliminarColegio(Long id) throws Exception {
@@ -110,7 +114,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     // ---------------- TALLERES ----------------
@@ -122,13 +127,14 @@ public class RESTClient {
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
 
         if (resp.statusCode() == 200) {
-            return mapper.readValue(resp.body(), new TypeReference<List<Taller>>() {});
+            return mapper.readValue(resp.body(), new TypeReference<List<Taller>>() {
+            });
         } else {
             throw new RuntimeException("Error al listar talleres: " + resp.body());
         }
     }
 
-    public void crearTaller(Map<String,String> body) throws Exception {
+    public void crearTaller(Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/talleres"))
@@ -137,10 +143,11 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
-    public void actualizarTaller(Long id, Map<String,String> body) throws Exception {
+    public void actualizarTaller(Long id, Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/talleres/" + id))
@@ -149,7 +156,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     public void eliminarTaller(Long id) throws Exception {
@@ -159,7 +167,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     // ---------------- USUARIOS ----------------
@@ -171,13 +180,14 @@ public class RESTClient {
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
 
         if (resp.statusCode() == 200) {
-            return mapper.readValue(resp.body(), new TypeReference<List<Usuario>>() {});
+            return mapper.readValue(resp.body(), new TypeReference<List<Usuario>>() {
+            });
         } else {
             throw new RuntimeException("Error al listar usuarios: " + resp.body());
         }
     }
 
-    public void crearUsuario(Map<String,String> body) throws Exception {
+    public void crearUsuario(Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/usuarios"))
@@ -186,10 +196,11 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
-    public void actualizarUsuario(Long id, Map<String,String> body) throws Exception {
+    public void actualizarUsuario(Long id, Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/usuarios/" + id))
@@ -198,7 +209,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     public void eliminarUsuario(Long id) throws Exception {
@@ -208,7 +220,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     public void eliminarUsuarioByEmail(String email) throws Exception {
@@ -218,7 +231,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     // ---------------- AGENDA ----------------
@@ -230,14 +244,14 @@ public class RESTClient {
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
 
         if (resp.statusCode() == 200) {
-            return mapper.readValue(resp.body(), new TypeReference<List<Agenda>>() {});
+            return mapper.readValue(resp.body(), new TypeReference<List<Agenda>>() {
+            });
         } else {
             throw new RuntimeException("Error al listar agenda: " + resp.body());
         }
     }
 
-
-    public void crearAgenda(Map<String,Object> body) throws Exception {
+    public void crearAgenda(Map<String, Object> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/agendas"))
@@ -246,11 +260,11 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
-
-    public void actualizarAgenda(Long id, Map<String,Object> body) throws Exception {
+    public void actualizarAgenda(Long id, Map<String, Object> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/agendas/" + id))
@@ -259,9 +273,9 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
-
 
     public void eliminarAgenda(Long id) throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
@@ -270,7 +284,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     // ---------------- ASIGNACIONES ----------------
@@ -289,13 +304,14 @@ public class RESTClient {
         }
     }
 
-    public List<Map<String,Object>> listarAsignacionesPorAgenda(Long agendaId) throws Exception {
+    public List<Map<String, Object>> listarAsignacionesPorAgenda(Long agendaId) throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/asignaciones/agenda/" + agendaId))
                 .GET()).build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        return parseResponse(resp, new TypeReference<>() {}, "Error al listar asignaciones");
+        return parseResponse(resp, new TypeReference<>() {
+        }, "Error al listar asignaciones");
     }
 
     public List<Usuario> listTalleristasPorAgenda(Long agendaId) throws Exception {
@@ -309,24 +325,27 @@ public class RESTClient {
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
 
         if (resp.statusCode() == 200) {
-            return mapper.readValue(resp.body(), new TypeReference<List<Usuario>>() {});
+            return mapper.readValue(resp.body(), new TypeReference<List<Usuario>>() {
+            });
         } else {
             throw new RuntimeException("Error al listar talleristas: " + resp.body());
         }
     }
 
-    public List<Map<String, Object>> obtenerTalleristasPorAgenda(Long agendaId) throws IOException, InterruptedException {
+    public List<Map<String, Object>> obtenerTalleristasPorAgenda(Long agendaId)
+            throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(BASE + "/asignaciones/agenda/" + agendaId))
-            .header("Authorization", "Bearer " + token)
-            .GET()
-            .build();
+                .uri(URI.create(BASE + "/asignaciones/agenda/" + agendaId))
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
 
         HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() != 200)
             throw new RuntimeException("Error al obtener talleristas: " + response.body());
 
-        return new ObjectMapper().readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {});
+        return new ObjectMapper().readValue(response.body(), new TypeReference<List<Map<String, Object>>>() {
+        });
     }
 
     public void eliminarAsignacionesPorAgenda(Long agendaId) throws Exception {
@@ -342,16 +361,17 @@ public class RESTClient {
     }
 
     // ---------------- REPORTES ----------------
-    public List<Map<String,Object>> listReportes() throws Exception {
+    public List<Map<String, Object>> listReportes() throws Exception {
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/reportes"))
                 .GET()).build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        return parseResponse(resp, new TypeReference<>() {}, "Error al listar reportes");
+        return parseResponse(resp, new TypeReference<>() {
+        }, "Error al listar reportes");
     }
 
-    public void crearReporte(Map<String,String> body) throws Exception {
+    public void crearReporte(Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/reportes"))
@@ -360,10 +380,11 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
-    public void actualizarReporte(Long id, Map<String,String> body) throws Exception {
+    public void actualizarReporte(Long id, Map<String, String> body) throws Exception {
         String json = mapper.writeValueAsString(body);
         HttpRequest req = withAuth(HttpRequest.newBuilder()
                 .uri(URI.create(BASE + "/reportes/" + id))
@@ -372,7 +393,8 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
 
     public void eliminarReporte(Long id) throws Exception {
@@ -382,21 +404,22 @@ public class RESTClient {
                 .build();
 
         HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 400) throw new RuntimeException(resp.body());
+        if (resp.statusCode() >= 400)
+            throw new RuntimeException(resp.body());
     }
-    
-    public byte[] downloadReportesExcel() throws Exception {
-    HttpRequest req = withAuth(HttpRequest.newBuilder()
-            .uri(URI.create(BASE + "/reportes/export"))
-            .GET())
-            .build();
 
-    HttpResponse<byte[]> resp = http.send(req, HttpResponse.BodyHandlers.ofByteArray());
+    public byte[] downloadReportesExcel() throws Exception {
+        HttpRequest req = withAuth(HttpRequest.newBuilder()
+                .uri(URI.create(BASE + "/reportes/export"))
+                .GET())
+                .build();
+
+        HttpResponse<byte[]> resp = http.send(req, HttpResponse.BodyHandlers.ofByteArray());
         if (resp.statusCode() == 200) {
             return resp.body();
         } else {
             throw new RuntimeException("Error al exportar Excel: " + resp.statusCode());
         }
     }
-    
+
 }

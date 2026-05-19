@@ -1,5 +1,4 @@
 com\sga\model\Agenda.class
-com\sga\controllers\TalleresController$ActionWithException.class
 com\sga\controllers\AgendaController$2.class
 com\sga\controllers\TalleresController.class
 com\sga\service\RESTClient$1.class
